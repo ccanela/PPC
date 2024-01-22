@@ -55,27 +55,33 @@ class HanabiGame:
         # Implement the logic for discarding a card here
         pass
 
+
     def play_card(self, player):
-        # Implement the logic for playing a card here
-        pass
+        #code pour choisir une carte et l'enlever (pop) de players_cards[f"player{player}"](avec interface graphique)
+        card_color = card['color']
+        card_number = card['number']
+
+        if card_number == self.play_pile[card_color] + 1:
+            self.play_pile[card_color] = card_number
+        else:
+            self.storm_tk -= 1
+        new_card = deck.pop()
+        self.players_cards[f"player{player}"].append(new_card)
+
 
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
         if self.storm_tk == 0:
-            print("The gods deliver their wrath in the form of a storm that puts an end to the fireworks.")
-            return True
-
+            return "storm"
 
         if all(card['number'] == 5 for card in self.play_pile.values()):
-            print("The players celebrate their spectacular victory with the maximum score of 25 points.")
-            return True
+            return "victory"
 
         # Check if the last card from the draw deck has been drawn
         if len(self.deck) == 0:
-            print("Each player gets one last turn.")
-            return True
+            return "last turn"
 
-        return False
+        return "continue"
 
 def initialize_player_window(player_num):
     pygame.init()
