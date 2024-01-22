@@ -5,9 +5,12 @@ import random
 
 class HanabiGame:
     def __init__(self, num_players):
-        self.play_pile = []
+        self.play_pile = {'red': 0, 'blue': 0, 'green': 0, 'yellow': 0, 'white': 0}
         self.discarded_cards = []
         self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
+        self.note_tk = 8
+        self.note_tk_used = 0
+        self.storm_tk = 3
         self.initialize_deck(num_players)
 
     def initialize_deck(self, num_players):
@@ -24,11 +27,55 @@ class HanabiGame:
                 card = deck.pop()
                 self.players_cards[f"player{player+1}"].append(card)
 
-    def display_game_state(self):
-        print("Play Pile:", self.play_pile)
-        print("Discarded Cards:", self.discarded_cards)
-        for player, cards in self.players_cards.items():
-            print(f"{player}'s Cards:", cards)
+    def turn(self, player):
+        print(f"It's {player}'s turn.")
+        action = input("Choose an action (give hint, discard card, play card): ")
+
+        if action == "give hint":
+            # Ensure it's not another player's turn
+            if player != self.current_player:
+                print("You can't give hints on another player's turn.")
+                return
+            # Implement the logic for giving a hint here
+            self.give_hint(player)
+        elif action == "discard card":
+            # Implement the logic for discarding a card here
+            self.discard_card(player)
+        elif action == "play card":
+            # Implement the logic for playing a card here
+            self.play_card(player)
+        else:
+            print("Invalid action. Please try again.")
+
+    def give_hint(self, player):
+        # Implement the logic for giving a hint here
+        pass
+
+    def discard_card(self, player):
+        # Implement the logic for discarding a card here
+        pass
+
+    def play_card(self, player):
+        # Implement the logic for playing a card here
+        pass
+
+    def check_end(self):
+        # Check if the third Storm token is turned lightning-side-up
+        if self.storm_tk == 0:
+            print("The gods deliver their wrath in the form of a storm that puts an end to the fireworks.")
+            return True
+
+
+        if all(card['number'] == 5 for card in self.play_pile.values()):
+            print("The players celebrate their spectacular victory with the maximum score of 25 points.")
+            return True
+
+        # Check if the last card from the draw deck has been drawn
+        if len(self.deck) == 0:
+            print("Each player gets one last turn.")
+            return True
+
+        return False
 
 def initialize_player_window(player_num):
     pygame.init()
