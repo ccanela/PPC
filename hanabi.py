@@ -11,26 +11,26 @@ class HanabiGame:
         self.note_tk = 8
         self.note_tk_used = 0
         self.storm_tk = 3
-        self.initialize_deck(num_players)
+        self.init_deck(num_players)
 
-    def initialize_deck(self, num_players):
+    def init_deck(self, num_players):
         colors = ['red', 'blue', 'green', 'yellow', 'white']
         numbers = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
 
         num_cards_in_hand = 5 if num_players in [2, 3] else 4
 
-        deck = [{'color': color, 'number': number} for color in colors for number in numbers]
-        random.shuffle(deck)
+        self.deck = [{'color': color, 'number': number} for color in colors for number in numbers]
+        random.shuffle(self.deck)
 
         for player in range(num_players):
             for _ in range(num_cards_in_hand):
-                card = deck.pop()
+                card = self.deck.pop()
                 self.players_cards[f"player{player+1}"].append(card)
 
     def turn(self, player):
         print(f"It's {player}'s turn.")
         action = input("Choose an action (give hint, discard card, play card): ")
-
+        # il manque: check if note_tk > 0 
         if action == "give hint":
             # Ensure it's not another player's turn
             if player != self.current_player:
@@ -48,16 +48,58 @@ class HanabiGame:
             print("Invalid action. Please try again.")
 
     def give_hint(self, player):
-        # Implement the logic for giving a hint here
-        pass
+        # avant d'appeler la fonction il faut voir s'il y a de note_tk disponibles c-a-d note_tk > 0 
+        self.note_tk -= 1 
+        self.note_tk_used += 1 
+
+        """ A travers l'interface graphique le jouer doit choisir: 
+        -Color or Number hint? 
+        - To which player? 
+        - Which color/number?  """
+        
+        #teammate = le joueur choisit à qui il veut donner une info. 
+
+        #card = choisit une carte sur laquelle il veut donner une info  
+
+        #hint_type = (logique interface graphique pour choisir quel type de hint on veut donner)
+
+        if hint_type == "color":
+        # Let the player choose a color
+        # This will also need to be done through the Pygame interface
+            color = card['color']
+
+            # Find all cards of that color in the teammate's hand
+            cards_of_color = [card for card in self.players_cards[teammate] if card['color'] == color]
+            #Code pour montrer au teammate quelles cartes ont le couleur choisit 
+        
+        if hint_type == "number":
+            num = card['number']
+            cards_of_number = [card for card in self.players_card[teammate] if card['number']== number]
+
+
 
     def discard_card(self, player):
-        # Implement the logic for discarding a card here
-        pass
+        # Avant de faire l'appel on doit regarder que note_tk_used > 0 sinon on peut pas "discard_card"
+        self.note_tk_used -= 1
+        self.note_tk += 1
+
+        #card_to_discard = le jouer choisira a travers l'interface graphique 
+
+        # Remove the chosen card from the player's hand
+        self.players_cards[player].remove(card_to_discard)
+
+        # Add the discarded card to the discard pile
+        self.discarded_cards.append(card_to_discard)
+
+        # Draw another card into the player's hand
+        if len(self.deck) > 0:
+            new_card = self.deck.pop()
+            self.players_cards[player].append(new_card)
 
 
     def play_card(self, player):
         #code pour choisir une carte et l'enlever (pop) de players_cards[f"player{player}"](avec interface graphique)
+
         card_color = card['color']
         card_number = card['number']
 
@@ -65,8 +107,10 @@ class HanabiGame:
             self.play_pile[card_color] = card_number
         else:
             self.storm_tk -= 1
-        new_card = deck.pop()
-        self.players_cards[f"player{player}"].append(new_card)
+
+        if len(self.deck) > 0:
+            new_card = self.deck.pop()
+            self.players_cards[f"player{player}"].append(new_card)
 
 
     def check_end(self):
@@ -83,7 +127,7 @@ class HanabiGame:
 
         return "continue"
 
-def initialize_player_window(player_num):
+def init_player_window(player_num):
     pygame.init()
     screen_width, screen_height = 400, 300
     screen = pygame.Surface((screen_width, screen_height))
@@ -114,7 +158,7 @@ while num_players < 2 or num_players > 5:
 
 hanabi_game = HanabiGame(num_players)
 
-player_screens = [initialize_player_window(i+1) for i in range(num_players)]
+player_screens = [init_player_window(i+1) for i in range(num_players)]
 window_sizes = [(400, 300), (400, 300), (400, 300), (400, 300), (400, 300)]
 
 pygame.display.set_caption('Hanabi Game')
