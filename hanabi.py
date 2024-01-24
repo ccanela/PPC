@@ -51,6 +51,14 @@ class HanabiGame:
 
     def turn(self, player):
         print(f"It's {player}'s turn.")
+        
+        if self.info_tk < 0 :
+            #Arreter d'afficher l'option give a hint
+            pass
+        else :
+            #Afficher l'option give a hint    
+            pass
+        
         action = input("Choose an action (give hint or play card): ")
         # il manque: check if info_tk > 0 
         if action == "give hint":
@@ -68,20 +76,41 @@ class HanabiGame:
             print("Invalid action. Please try again.")
 
     def give_hint(self, player):
-        # avant d'appeler la fonction il faut voir s'il y a de info_tk disponibles c-a-d info_tk >  
+        #avant d'appeler la fonction il faut voir s'il y a de info_tk disponibles c-a-d info_tk >  
+        
+        self.tokens_sem.acquire()
         self.info_tk -= 1 
-
-
+        self.tokens_sem.release()
+        
+        #Arreter d'afficher les boutons d'option
+        #Afficher indication pour choisir carte puis piece number or color
+        """ 
         if hint_type == "color":
             color = card['color']
             cards_of_color = [card for card in self.players_cards[teammate] if card['color'] == color]
+            self.playersCards_sem.acquire()
+            for card in self.players_cards[teammate]:
+                if card in cards_of_color:
+                    card["hint_color"] = True
+            self.playersCards_sem.release()        
+                        
+                
         if hint_type == "number":
             num = card['number']
-            cards_of_number = [card for card in self.players_card[teammate] if card['number']== number]
+            cards_of_number = [card for card in self.players_card[teammate] if card['number'] == number]
+            self.playersCards_sem.acquire()
+            for card in self.players_cards[teammate]:
+                if card in cards_of_number:
+                    card["hint_number"] = True
+            self.playersCards_sem.release()  
+        """   
+             
+            
 
 
 
-    """     def discard_card(self, player):
+    """ 
+    def discard_card(self, player):
         # Avant de faire l'appel on doit regarder que note_tk_used > 0 sinon on peut pas "discard_card"
         self.note_tk_used -= 1
         self.note_tk += 1
@@ -152,15 +181,15 @@ class HanabiGame:
             player_processes.append(player_process)
 
         # Configurar y gestionar la comunicación a través de sockets
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host, port = 'localhost', 12345
-        server_socket.bind((host, port))
-        server_socket.listen(self.num_players)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_server :
+            host, port = 'localhost', 12345
+            socket_server.bind((host, port))
+            socket_server.listen(self.num_players)
 
-        player_sockets = []
-        for i in range(self.num_players):
-            conn, addr = server_socket.accept()
-            player_sockets.append(conn)
+            player_sockets = []
+            for i in range(self.num_players):
+                conn, addr = socket_server.accept()
+                player_sockets.append(conn, addr)
 
         # Iniciar el bucle principal del juego
         running = True
