@@ -4,7 +4,11 @@ import paramiko
 import errno
 import random
 import socket
+import os 
+import signal
+import sysv_ipc as ipc
 import threading as th
+import psutil
 import multiprocessing as mp 
 from test_button2 import Button
 
@@ -81,6 +85,11 @@ class HanabiGame:
             self.suites_sem.acquire()
             self.suites[card_color] = card_number
             self.suites_sem.release()
+            if card_number == 5: 
+                self.tokens_sem.acquire()
+                info_tk += 1 
+                self.tokens_sem.release()
+
         else:
             self.tokens_sem.acquire()
             self.storm_tk -= 1
@@ -98,17 +107,41 @@ class HanabiGame:
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
         if self.storm_tk == 0:
-            return "storm"
+            pid_players = get_pids("player.py")
+            for pid in pid_players:
+                try:
+                    os.kill(pid, signal.SIGUSR2)
+                    print(f"Signal {signal.SIGUSR2} sent to process with PID: {pid}")
+                except ProcessLookupError:
+                    print(f"Error: No se puede encontrar el proceso con PID {pid}")
+                except PermissionError:
+                    print(f"Error: No se tiene permiso para enviar la señal al proceso con PID {pid}")
+
 
         if all(card['number'] == 5 for card in self.play_pile.values()):
-            return "victory"
+            pid_players = get_pids("player.py")
+            for pid in pid_players:
+                try:
+                    os.kill(pid, signal.SIGUSR1)
+                    print(f"Signal {signal.SIGUSR1} sent to process with PID: {pid}")
+                except ProcessLookupError:
+                    print(f"Error: No se puede encontrar el proceso con PID {pid}")
+                except PermissionError:
+                    print(f"Error: No se tiene permiso para enviar la señal al proceso con PID {pid}")
+
 
         # Check if the last card from the draw deck has been drawn
-        if len(self.deck) == 0:
-            return "last turn"
+        """ if len(self.deck) == 0:
+            pids = get_pids("player.py")
+            return "last turn" """
 
-        return "continue"
-    
+    def get_pids(self, process_name): 
+        pids = []
+        for proc in psutil.process_iter(['pid', 'name']):
+            if process_name in proc.info['name']:
+                pids.append(proc.info['pid'])
+        return pids
+
     def player_turn(self, player_num):
         # Lógica específica del turno del jugador
         # Aquí debes usar self.pipe para enviar y recibir información del proceso del juego

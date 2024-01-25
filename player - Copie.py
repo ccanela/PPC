@@ -1,10 +1,13 @@
 import sysv_ipc as ipc
 import socket
-import sys
+import os 
+import signal 
 
 
 
-def player_process(self, player_num, player_pipe):
+def player_process(self, player_num):
+    signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
+    signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
     player_name = f"player{player_num}"
     player_hand = self.players_cards[player_name]
     HOST_int = "localhost"
@@ -99,8 +102,20 @@ def receive(socket_connexion, buffer_size=1024):
     except Exception as e:
         print(f"Error when receiving data : {e}")
         return None       
+      
         
+   
+def end_game(signum, frame):
+    if signum == signal.SIGUSR1:
+        print(f"Signal received: {signum}. Game status: Victory!!!")
+        #timer ou affichage
+    if signum == signal.SIGUSR2:
+        print(f"Signal received: {signum}. Game status:  Loss")
+        #affichage ou timer 
+    #vider toutes les ressources avant de faire "exit"
+    os._exit(0)
         
+
 if __name__ == "__main__" :
     key = 100
     mq = ipc.MessageQueue(key, ipc.IPC_CREAT)
