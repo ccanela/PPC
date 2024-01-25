@@ -1,13 +1,15 @@
 import pygame
 
 class Button:
-    def __init__(self, image, position, scale=1.0):
+    def __init__(self, image, position, action=None, scale=1.0, value=None):
         self.original_image = pygame.image.load(image)
         self.scale = scale
         self.image = self.scale_image(self.original_image, scale)
         self.position = position
         self.rect = self.image.get_rect(topleft=position)
         self.hovered = False
+        self.action = action
+        self.value = value
 
     def scale_image(self, image, scale):
         infoObject = pygame.display.Info()
@@ -36,13 +38,17 @@ class Button:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if self.hovered:
                 print("Button clicked!")
+                if self.action: 
+                    self.action()
+def hello():
+    print("Hello")
 
 players_cards = {'player1': [{'color': 'white', 'number': 5}, {'color': 'yellow', 'number': 2}, {'color': 'blue', 'number': 4}, {'color': 'blue', 'number': 5}, {'color': 'yellow', 'number': 2}], 'player2': [{'color': 'green', 'number': 2}, {'color': 'green', 'number': 1}, {'color': 'green', 'number': 2}, {'color': 'blue', 'number': 1}, {'color': 'green', 'number': 1}], 'player3': [{'color': 'red', 'number': 2}, {'color': 'yellow', 'number': 4}, {'color': 'yellow', 'number': 3}, {'color': 'green', 'number': 5}, {'color': 'yellow', 'number': 1}], 'player4': [{'color': 'white', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 1}, {'color': 'green', 'number': 3}, {'color': 'green', 'number': 4}], 'player5': [{'color': 'red', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 5}, {'color': 'white', 'number': 2}, {'color': 'yellow', 'number': 5}]}
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
 buttons = []
-for i, card in enumerate(players_cards["player1"]): 
-    button = Button(f'{card["number"]}_{card["color"]}.png', (100 + i*60, 100), scale=0.1) 
+for i, card in enumerate(players_cards["player2"]): 
+    button = Button(f'{card["number"]}_{card["color"]}.png', (100 + i*65, 100), action=hello, scale=0.1, value=(card["number"], card["color"])) 
     buttons.append(button)
     
 
