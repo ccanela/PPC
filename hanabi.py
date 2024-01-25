@@ -3,34 +3,52 @@ import sys
 import paramiko
 import random
 import socket
+import threading as th
 import multiprocessing as mp 
 from test_button2 import Button
 
+class State:
+    WAITING = 1
+    PLAYING = 2
+    
 class HanabiGame:
     def __init__(self, num_players):
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
-        self.play_pile = mp.Manager().dict({color: 0 for color in self.colors}) 
+        self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
+        self.discard = []
         self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
         self.discarded_cards = []
         self.info_tk = mp.Value('i', num_players + 3)  
+        self.playerStates = [State.WAITING for _ in range(num_players)]
         self.storm_tk = mp.Value('i', 3)  
         self.init_deck(num_players)
         self.players_pipes = [mp.Pipe() for _ in range(num_players)]
-        self.message_queue = mp.Queue()  
+        self.message_queue = mp.Queue() 
+        self.deck_sem = th.Semaphore(0) 
+        self.suites_sem = th.Semaphore(0)
+        self.playersCards_sem = th.Semaphore(0)
+        self.tokens_sem = th.Semaphore(0)
+        self.playerStates_sem = [th.Semaphore(0) for _ in range(num_players)]
         print(self.players_cards)
 
     def init_deck(self, num_players):
         numbers = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
         num_cards_in_hand = 5
-
-        self.deck = [{'color': color, 'number': number} for color in self.colors for number in numbers]
+        
+        self.deck_sem.acquire()
+        self.deck = [{'color': color, 'number': number, 'hint_color': False, 'hint_number': False} for color in self.colors for number in numbers]
         random.shuffle(self.deck)
+        self.deck_sem.release()
 
         for player in range(num_players):
             for _ in range(num_cards_in_hand):
+                self.deck_sem.acquire()
                 card = self.deck.pop()
+                self.deck_sem.release()
+                self.playersCards_sem.acquire()
                 self.players_cards[f"player{player+1}"].append(card)
+                self.playersCards_sem.release()
 
     def turn(self, player):
         print(f"It's {player}'s turn.")
@@ -44,11 +62,14 @@ class HanabiGame:
         elif action == "play card":
             # Implement the logic for playing a card here
             self.play_card(player)
+        
+        elif action == "discard":
+            self.discard(player)    
         else:
             print("Invalid action. Please try again.")
 
     def give_hint(self, player):
-        # avant d'appeler la fonction il faut voir s'il y a de info_tk disponibles c-a-d info_tk > 0 
+        # avant d'appeler la fonction il faut voir s'il y a de info_tk disponibles c-a-d info_tk >  
         self.info_tk -= 1 
 
 
@@ -87,13 +108,21 @@ class HanabiGame:
         card_number = card['number']
 
         if card_number == self.play_pile[card_color] + 1:
-            self.play_pile[card_color] = card_number
+            self.suites_sem.acquire()
+            self.suites[card_color] = card_number
+            self.suites_sem.release()
         else:
+            self.tokens_sem.acquire()
             self.storm_tk -= 1
+            self.tokens_sem.release()
 
         if len(self.deck) > 0:
+            self.deck_sem.acquire()
+            self.playersCards_sem.acquire()
             new_card = self.deck.pop()
             self.players_cards[f"player{player}"].append(new_card)
+            self.deck_sem.release()
+            self.playersCards_sem.release()
 
 
     def check_end(self):
