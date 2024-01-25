@@ -4,7 +4,6 @@ import paramiko
 import errno
 import random
 import socket
-import sysv_ipc as ipc
 import threading as th
 import multiprocessing as mp 
 from test_button2 import Button
@@ -14,7 +13,7 @@ class State:
     PLAYING = 2
     
 class HanabiGame:
-    def __init__(self, num_players, messageQueue):
+    def __init__(self, num_players, socket):
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
         self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
@@ -24,13 +23,16 @@ class HanabiGame:
         self.info_tk = mp.Value('i', num_players + 3)  
         self.playerStates = [State.WAITING for _ in range(num_players)]
         self.storm_tk = mp.Value('i', 3)  
-        self.init_deck(num_players)
-        self.message_queue = messageQueue
         self.deck_sem = th.Semaphore(0) 
         self.suites_sem = th.Semaphore(0)
         self.playersCards_sem = th.Semaphore(0)
         self.tokens_sem = th.Semaphore(0)
         self.playerStates_sem = [th.Semaphore(0) for _ in range(num_players)]
+        self.socket_server = socket
+        
+        self.send("1")        
+        self.init_deck(num_players)
+        
         print(self.players_cards)
 
     def init_deck(self, num_players):
@@ -51,7 +53,23 @@ class HanabiGame:
                 self.players_cards[f"player{player+1}"].append(card)
                 self.playersCards_sem.release()
 
-            
+    def send(self, mess):
+        with self.socket_server:
+            try:
+                data_encoded = mess.encode()      
+                self.socket_server.sendall(data_encoded)
+            except Exception as e:
+                print(f"Error when sending data : {e}")    
+                
+    def receive(self, buffer_size=1024):
+        with self.socket_server:
+            try:
+                data_received = self.socket_server.recv(buffer_size)        
+                data_decoded = data_received.decode()        
+                return data_decoded
+            except Exception as e:
+                print(f"Error when receiving data : {e}")
+                return None                 
     
     def play_card(self, player):
         #code pour choisir une carte et l'enlever (pop) de players_cards[f"player{player}"](avec interface graphique)
@@ -127,39 +145,39 @@ class HanabiGame:
 
  
 if __name__ == "__main__":
-    num_players = 0
-    key = 100
-    mq = ipc.MessageQueue(key, ipc.IPC_CREAT)
+    
+    if len(sys.argv) < 2:
+        print("required index argument missing, terminating.", file=sys.stderr)
+        sys.exit(1)
+        
+    try:
+        num_players = int(sys.argv[1])
+    except ValueError:
+        print("bad index argument: {}, terminating.".format(sys.argv[1]), file=sys.stderr)
+        sys.exit(2)
+        
+    if num_players < 0:
+        print("negative index argument: {}, terminating.".format(num_players), file=sys.stderr)
+        sys.exit(3)
+    
+    players_connected = 0 
     player_sockets = []
-    port = 12340
+    host = 'localhost'
+    port = 12345
     print("Open to connections")
-    while num_players < 5:
-        if num_players > 1 :
-            try:
-                print("hello")
-                m, t = mq.receive(type = 1, block=False)
-                if (t == 1) and (m == b"") and (num_players > 1) :
-                    break    
-            except ipc.ExistentialError as e:
-                if e.args[0] == errno.ENOMSG:
-                    print(f"Aucun message de type 1 disponible.")
-                else:
-                    print("Erreur lors de la réception du message :", e)
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_server :
-            host = 'localhost'
-            port += 1
-            socket_server.bind((host, port))
-            socket_server.listen(5)
+    
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_server :
+        socket_server.bind((host, port))
+        socket_server.listen(num_players)
+        while players_connected < num_players :
             conn, addr = socket_server.accept()
             player_sockets.append((conn, addr))
-            num_players += 1
+            players_connected += 1
             
-          
-                    
-    print("ouais")       
+        print("Stating game")       
             
-    game_process = mp.Process(target=HanabiGame, args=(num_players, mq))
-    game_process.start()
+        game_process = mp.Process(target=HanabiGame, args=(num_players, socket_server))
+        game_process.start()
     
 
  

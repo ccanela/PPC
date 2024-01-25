@@ -1,6 +1,6 @@
 import sysv_ipc as ipc
 import socket
-
+import sys
 
 
 
@@ -82,34 +82,37 @@ def user():
     while answer != 1:
         print("1. to join the game")
         answer = int(input())
-    return answer    
-
-def all_connected() :
-    answer = -1
-    while answer not in [0, 1]:
-        print("0. to pass\n1. if all players are connected") 
-        answer = int(input())  
-    return bool(answer)         
-
+    return    
+   
+def send(socket_connexion, data):
+    try:
+        data_encoded = data.encode()      
+        socket_connexion.sendall(data_encoded)
+    except Exception as e:
+        print(f"Error when sending data : {e}")
+        
+def receive(socket_connexion, buffer_size=1024):
+    try:
+        data_received = socket_connexion.recv(buffer_size)        
+        data_decoded = data_received.decode()        
+        return data_decoded
+    except Exception as e:
+        print(f"Error when receiving data : {e}")
+        return None       
+        
+        
 if __name__ == "__main__" :
     key = 100
     mq = ipc.MessageQueue(key, ipc.IPC_CREAT)
+    user()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_client :
         host = 'localhost'
         numplayer = 0
-        print("Player number : ")
-        while numplayer<1 or numplayer>5:
-            numplayer = int(input())
-        port = 12340 + numplayer
+        port = 12345
         socket_client.connect((host, port))
-        mq.send(b"", type=50)
-        print("hola")
-        
-        if all_connected() :
-            mess = b""
-            mq.send(mess, type=1)
-        else:
-            mess = b"1"
-            mq.send(mess, type=1)
-        
-        m, t = mq.receive(type=2, block=True)                
+        print("Connected")
+    
+        data = receive(socket_client)
+        while data != "1":
+            data = receive(socket_client)
+        print("Starting game")             
