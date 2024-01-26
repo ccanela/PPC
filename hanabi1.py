@@ -10,11 +10,7 @@ import sysv_ipc as ipc
 import threading as th
 import psutil
 import multiprocessing as mp 
-<<<<<<< HEAD:hanabi - Copie.py
 #from test_button2 import Button
-=======
-# from test_button2 import Button
->>>>>>> refs/remotes/origin/main:hanabi1.py
 
 class State:
     WAITING = 1
@@ -31,19 +27,15 @@ class HanabiGame:
         self.info_tk = mp.Value('i', num_players + 3)  
         self.playerStates = [State.WAITING for _ in range(num_players)]
         self.storm_tk = mp.Value('i', 3)  
-        self.deck_sem = th.Semaphore(0) 
-        self.suites_sem = th.Semaphore(0)
-        self.playersCards_sem = th.Semaphore(0)
-        self.tokens_sem = th.Semaphore(0)
-        self.playerStates_sem = [th.Semaphore(0) for _ in range(num_players)]
+        self.deck_sem = th.Semaphore(1) 
+        self.suites_sem = th.Semaphore(1)
+        self.playersCards_sem = th.Semaphore(1)
+        self.tokens_sem = th.Semaphore(1)
+        self.playerStates_sem = [th.Semaphore(1) for _ in range(num_players)]
         self.players_info = players_info
         
         self.send("start")
-        
-        # Tests signals
-        self.storm_tk = 0
-        self.check_end()
-                 
+                        
         self.init_deck(num_players)       
         print(self.players_cards)
         
