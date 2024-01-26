@@ -31,6 +31,7 @@ class HanabiGame:
         self.suites = m.get_suites()
         self.discard = []
         self.players_cards = m.get_players_cards()
+        print(type(self.players_cards))
         self.tokens = m.get_tokens()
         self.deck_sem = th.Lock() 
         self.suites_sem = th.Lock()
