@@ -34,7 +34,9 @@ class HanabiGame:
         self.playerStates_sem = [th.Semaphore(0) for _ in range(num_players)]
         self.player_sockets = sockets
         
-        self.send("1")        
+        self.storm_tk = 0
+        self.send("1") 
+        self.check_end()       
         self.init_deck(num_players)
         
         print(self.players_cards)
@@ -82,7 +84,7 @@ class HanabiGame:
         card_color = card['color']
         card_number = card['number']
 
-        if card_number == self.play_pile[card_color] + 1:
+        if card_number == self.suites[card_color] + 1:
             self.suites_sem.acquire()
             self.suites[card_color] = card_number
             self.suites_sem.release()
@@ -107,8 +109,10 @@ class HanabiGame:
 
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
+
         if self.storm_tk == 0:
-            pid_players = get_pids("player.py")
+            print("1")
+            pid_players = self.get_pids("player.py")    #verif nom process
             for pid in pid_players:
                 try:
                     os.kill(pid, signal.SIGUSR2)
@@ -118,9 +122,9 @@ class HanabiGame:
                 except PermissionError:
                     print(f"Error: No se tiene permiso para enviar la señal al proceso con PID {pid}")
 
-
-        if all(card['number'] == 5 for card in self.play_pile.values()):
-            pid_players = get_pids("player.py")
+        elif all(card['color'] == 5 for card in self.suites.values()):
+            print("2")
+            pid_players = self.get_pids("player.py")
             for pid in pid_players:
                 try:
                     os.kill(pid, signal.SIGUSR1)
@@ -208,7 +212,7 @@ if __name__ == "__main__":
             player_sockets.append((conn, addr))
             players_connected += 1
             
-        print("Stating game")       
+        print("Starting game")       
             
         game_process = mp.Process(target=HanabiGame, args=(num_players, player_sockets, ))
         game_process.start()

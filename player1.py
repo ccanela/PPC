@@ -3,16 +3,18 @@ import socket
 import os 
 import signal 
 import sys
+import multiprocessing as mp
+from hanabi1 import HanabiGame as hg
 
 
 
-def player_process(self, player_num):
+def player_process(player_num):
     signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
     player_name = f"player{player_num}"
-    player_hand = self.players_cards[player_name]
+    # player_hand = hg.players_cards[player_name]
     HOST_int = "localhost"
-    PORT_int = 6666 + player_num
+    PORT_int = 6666 + int(player_num)
 
     server_socket_int = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket_int.bind((HOST_int, PORT_int))
@@ -26,10 +28,10 @@ def player_process(self, player_num):
         # Lógica del jugador aquí
         # Manejar la comunicación con el juego a través del pipe y el socket
         
-def turn(self, player):
+def turn(player):
         print(f"It's {player}'s turn.")
         
-        if self.info_tk < 0 :
+        if hg.info_tk < 0 :
             #Arreter d'afficher l'option give a hint
             pass
         else :
@@ -41,23 +43,23 @@ def turn(self, player):
         if action == "give hint":
             # Ensure it's not another player's turn
             # Implement the logic for giving a hint here
-            self.give_hint(player)
+            give_hint(player)
 
         elif action == "play card":
             # Implement the logic for playing a card here
-            self.play_card(player)
+            hg.lay_card(player)
         
         elif action == "discard":
-            self.discard(player)    
+            hg.discard(player)    
         else:
             print("Invalid action. Please try again.")
 
-def give_hint(self, player):
+def give_hint(player):
     #avant d'appeler la fonction il faut voir s'il y a de info_tk disponibles c-a-d info_tk >  
     
-    self.tokens_sem.acquire()
-    self.info_tk -= 1 
-    self.tokens_sem.release()
+    hg.tokens_sem.acquire()
+    info_tk -= 1 
+    hg.tokens_sem.release()
     
     #Arreter d'afficher les boutons d'option
     #Afficher indication pour choisir carte puis piece number or color
@@ -133,4 +135,8 @@ if __name__ == "__main__" :
         while data != "1":
             print("c")
             data = receive(socket_client)
-        print("Starting game")             
+        print("Starting game")
+        
+        game_process = mp.Process(target=player_process, args=(sys.argv[1],))
+        game_process.start()
+                     
