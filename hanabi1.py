@@ -146,11 +146,16 @@ class HanabiGame:
         os._exit(0)          
 
        
-    def player_turn(self, player_num):
-        # Lógica específica del turno del jugador
-        # Aquí debes usar self.pipe para enviar y recibir información del proceso del juego
-        
-        pass
+    def player_turn(self, playerId):
+        end = False
+        while not end:
+            data = self.receive(playerId)
+            while (data != "end of the turn") or (data != "play card"):
+                data = self.receive(playerId)
+            if data == "play card":
+                self.play_card(playerId)
+            else:
+                end = True
 
     def start_game(self):
         players = self.players_info.keys()
@@ -162,9 +167,6 @@ class HanabiGame:
             self.player_turn(current_player)
             self.check_end()            
             i_player = (i_player + 1) % len(players)
-            
-            # Lógica del juego aquí
-            # Manejar la comunicación con los jugadores a través de los sockets y las colas
 
  
 if __name__ == "__main__":
