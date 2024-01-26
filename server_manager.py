@@ -7,6 +7,7 @@ num_players = int(input("How many players?"))
 colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
 tokens = {"information_tokens" : 3, "fuse_tokens" : 3}
 suites = {color: 0 for color in colors}
+print(suites)
 players_cards = {f"player{i+1}": [] for i in range(num_players)}
 
 class RemoteManager(BaseManager): pass
