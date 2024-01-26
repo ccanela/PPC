@@ -40,11 +40,36 @@ class Button:
                 print("Button clicked!")
                 if self.action: 
                     self.action()
+class Text:
+    def __init__(self, text, position, font_name=None, font_size=50, color=(0, 0, 0), box_color=None, box_padding=10):
+        self.font = pygame.font.Font(font_name, font_size)
+        self.text_surface = self.font.render(text, True, color)
+        self.text_rect = self.text_surface.get_rect(topleft=position)
+
+        if box_color:
+            self.box_color = box_color
+            self.box_padding = box_padding
+            self.box_rect = pygame.Rect(
+                self.text_rect.x - box_padding,
+                self.text_rect.y - box_padding,
+                self.text_rect.width + 2 * box_padding,
+                self.text_rect.height + 2 * box_padding
+            )
+
+    def draw(self, screen):
+        if hasattr(self, 'box_color'):
+            pygame.draw.rect(screen, self.box_color, self.box_rect)
+        screen.blit(self.text_surface, self.text_rect)
+
+
 def hello():
     print("Hello")
 
+
 players_cards = {'player1': [{'color': 'white', 'number': 5}, {'color': 'yellow', 'number': 2}, {'color': 'blue', 'number': 4}, {'color': 'blue', 'number': 5}, {'color': 'yellow', 'number': 2}], 'player2': [{'color': 'green', 'number': 2}, {'color': 'green', 'number': 1}, {'color': 'green', 'number': 2}, {'color': 'blue', 'number': 1}, {'color': 'green', 'number': 1}], 'player3': [{'color': 'red', 'number': 2}, {'color': 'yellow', 'number': 4}, {'color': 'yellow', 'number': 3}, {'color': 'green', 'number': 5}, {'color': 'yellow', 'number': 1}], 'player4': [{'color': 'white', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 1}, {'color': 'green', 'number': 3}, {'color': 'green', 'number': 4}], 'player5': [{'color': 'red', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 5}, {'color': 'white', 'number': 2}, {'color': 'yellow', 'number': 5}]}
 pygame.init()
+pygame.font.init()
+text = Text("HANABI GAME", (250, 300), font_size=50, box_color=(255, 255, 255), box_padding=20)
 screen = pygame.display.set_mode((800, 600))
 buttons = []
 for i, card in enumerate(players_cards["player2"]): 
@@ -57,6 +82,7 @@ while running:
     screen.fill((200, 255, 255))
     for button in buttons:
         button.draw(screen)
+    text.draw(screen)
     pygame.display.flip()
 
     for event in pygame.event.get():

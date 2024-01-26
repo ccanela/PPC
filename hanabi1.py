@@ -10,7 +10,11 @@ import sysv_ipc as ipc
 import threading as th
 import psutil
 import multiprocessing as mp 
+<<<<<<< HEAD:hanabi - Copie.py
+#from test_button2 import Button
+=======
 # from test_button2 import Button
+>>>>>>> refs/remotes/origin/main:hanabi1.py
 
 class State:
     WAITING = 1
