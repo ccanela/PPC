@@ -10,14 +10,14 @@ import sysv_ipc as ipc
 import threading as th
 import psutil
 import multiprocessing as mp 
-from test_button2 import Button
+# from test_button2 import Button
 
 class State:
     WAITING = 1
     PLAYING = 2
     
 class HanabiGame:
-    def __init__(self, num_players, socket):
+    def __init__(self, num_players, sockets):
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
         self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
@@ -32,7 +32,7 @@ class HanabiGame:
         self.playersCards_sem = th.Semaphore(0)
         self.tokens_sem = th.Semaphore(0)
         self.playerStates_sem = [th.Semaphore(0) for _ in range(num_players)]
-        self.socket_server = socket
+        self.player_sockets = sockets
         
         self.send("1")        
         self.init_deck(num_players)
@@ -58,17 +58,18 @@ class HanabiGame:
                 self.playersCards_sem.release()
 
     def send(self, mess):
-        with self.socket_server:
+        for conn, addr in self.player_sockets:
             try:
                 data_encoded = mess.encode()      
-                self.socket_server.sendall(data_encoded)
+                conn.sendall(data_encoded)    
             except Exception as e:
-                print(f"Error when sending data : {e}")    
+                print(f"Error when sending data : {e}")   
                 
-    def receive(self, buffer_size=1024):
-        with self.socket_server:
+    def receive(self, num_player, buffer_size=1024):
+        while True:
+            conn, addr = self.player_sockets[num_player]
             try:
-                data_received = self.socket_server.recv(buffer_size)        
+                data_received = conn.recv(buffer_size)        
                 data_decoded = data_received.decode()        
                 return data_decoded
             except Exception as e:
@@ -209,7 +210,7 @@ if __name__ == "__main__":
             
         print("Stating game")       
             
-        game_process = mp.Process(target=HanabiGame, args=(num_players, socket_server))
+        game_process = mp.Process(target=HanabiGame, args=(num_players, player_sockets, ))
         game_process.start()
     
 

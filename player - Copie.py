@@ -2,6 +2,7 @@ import sysv_ipc as ipc
 import socket
 import os 
 import signal 
+import sys
 
 
 
@@ -90,9 +91,10 @@ def user():
 def send(socket_connexion, data):
     try:
         data_encoded = data.encode()      
-        socket_connexion.sendall(data_encoded)
+        socket_connexion.sendall(data_encoded)   
     except Exception as e:
-        print(f"Error when sending data : {e}")
+        print(f"Error when sending data : {e}")    
+   
         
 def receive(socket_connexion, buffer_size=1024):
     try:
@@ -129,5 +131,6 @@ if __name__ == "__main__" :
     
         data = receive(socket_client)
         while data != "1":
+            print("c")
             data = receive(socket_client)
         print("Starting game")             
