@@ -125,18 +125,21 @@ def end_game(signum, frame):
 if __name__ == "__main__" :
     key = 100
     mq = ipc.MessageQueue(key, ipc.IPC_CREAT)
+    pid = os.getpid()
     user()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_client :
         host = 'localhost'
-        numplayer = 0
         port = 12345
         socket_client.connect((host, port))
         print("Connected")
+        send(socket_client, str(pid))
+        playerId = receive(socket_client)
+        print(f"Tu es le {playerId}")
     
         data = receive(socket_client)
-        while data != "1":
-            print("c")
+        while data != "start":
             data = receive(socket_client)
+            
         print("Starting game")
         
-        player_process(sys.argv[1])                          
+        player_process(playerId)                          

@@ -17,7 +17,7 @@ class State:
     PLAYING = 2
     
 class HanabiGame:
-    def __init__(self, num_players, sockets):
+    def __init__(self, num_players, players_info):
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
         self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
@@ -32,13 +32,14 @@ class HanabiGame:
         self.playersCards_sem = th.Semaphore(0)
         self.tokens_sem = th.Semaphore(0)
         self.playerStates_sem = [th.Semaphore(0) for _ in range(num_players)]
-        self.player_sockets = sockets
+        self.players_info = players_info
+        
+        self.send("start")
         
         # Tests signals
         self.storm_tk = 0
-        self.send("1") 
         self.check_end()
-               
+                 
         self.init_deck(num_players)       
         print(self.players_cards)
         
@@ -62,17 +63,26 @@ class HanabiGame:
                 self.players_cards[f"player{player+1}"].append(card)
                 self.playersCards_sem.release()
 
-    def send(self, mess):
-        for conn, addr in self.player_sockets:
+    def send(self, mess, player="all"):
+        if player == "all":
+            for player in self.players_info.values():
+                conn = player["socket"][0]
+                try:
+                    data_encoded = mess.encode()      
+                    conn.sendall(data_encoded)    
+                except Exception as e:
+                    print(f"Error when sending data : {e}")
+        else :
+            conn = self.players_info[player]["socket"][0] 
             try:
                 data_encoded = mess.encode()      
                 conn.sendall(data_encoded)    
             except Exception as e:
-                print(f"Error when sending data : {e}")   
-                
-    def receive(self, num_player, buffer_size=1024):
+                print(f"Error when sending data : {e}")              
+                    
+    def receive(self, playerId, buffer_size=1024):
         while True:
-            conn, addr = self.player_sockets[num_player]
+            conn = self.players_info[playerId]["socket"][0]
             try:
                 data_received = conn.recv(buffer_size)        
                 data_decoded = data_received.decode()        
@@ -112,12 +122,9 @@ class HanabiGame:
 
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
-
         if self.storm_tk == 0:
-            pid_players = self.get_pids("player1.py")
-            #verif nom process
-            print(pid_players)
-            for pid in pid_players:
+            for info in players_info.values():
+                pid = info["pid"]
                 try:
                     os.kill(pid, signal.SIGUSR2)
                     print(f"Signal {signal.SIGUSR2} sent to process with PID: {pid}")
@@ -137,58 +144,22 @@ class HanabiGame:
                     print(f"Error: No se puede encontrar el proceso con PID {pid}")
                 except PermissionError:
                     print(f"Error: No se tiene permiso para enviar la señal al proceso con PID {pid}")
+        
+        os._exit(0)          
 
-
-        # Check if the last card from the draw deck has been drawn
-        """ if len(self.deck) == 0:
-            pids = get_pids("player.py")
-            return "last turn" """
-
-    def get_pids(self, process_name): 
-        pids = []
-        print(psutil.process_iter(['pid', 'name']))
-        for proc in psutil.process_iter(['pid', 'name']):
-            print(proc)
-            print(proc.info)
-            print(proc.info["name"])
-            if process_name in proc.info['name']:    
-                print("oui")    
-                pids.append(proc.info['pid'])
-        return pids
-
+       
     def player_turn(self, player_num):
         # Lógica específica del turno del jugador
         # Aquí debes usar self.pipe para enviar y recibir información del proceso del juego
         pass
 
     def start_game(self):
-        player_processes = []
-        for i in range(self.num_players):
-            player_process = mp.Process(target=self.player_process, args=(i + 1, self.players_pipes[i][1]))
-            player_process.start()
-            player_processes.append(player_process)
-
-        # Configurar y gestionar la comunicación a través de sockets
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_server :
-            host, port = 'localhost', 12345
-            socket_server.bind((host, port))
-            socket_server.listen(self.num_players)
-
-            player_sockets = []
-            for i in range(self.num_players):
-                conn, addr = socket_server.accept()
-                player_sockets.append(conn, addr)
-
-        # Iniciar el bucle principal del juego
+       
         running = True
         while running:
             pass
             # Lógica del juego aquí
             # Manejar la comunicación con los jugadores a través de los sockets y las colas
-
-        # Cierre adecuado de procesos y recursos...
-        for player_process in player_processes:
-            player_process.join()
 
  
 if __name__ == "__main__":
@@ -207,8 +178,12 @@ if __name__ == "__main__":
         print("negative index argument: {}, terminating.".format(num_players), file=sys.stderr)
         sys.exit(3)
     
+    elif num_players > 5:
+        print("bad index argument (too many players): {}, terminating.".format(num_players), file=sys.stderr)
+        sys.exit(4)    
+    
     players_connected = 0 
-    player_sockets = []
+    players_info = {}
     host = 'localhost'
     port = 12345
     print("Open to connections")
@@ -218,15 +193,17 @@ if __name__ == "__main__":
         socket_server.listen(num_players)
         while players_connected < num_players :
             conn, addr = socket_server.accept()
-            player_sockets.append((conn, addr))
             players_connected += 1
+            pid = conn.recv(1024)
+            pid = pid.decode()           
+            playerId = f"player{players_connected}" 
+            conn.sendall(playerId.encode())      
+            players_info[playerId] = {"socket": (conn, addr), "pid": int(pid)}
             
         print("Starting game")       
-            
-        game_process = mp.Process(target=HanabiGame, args=(num_players, player_sockets, ))
-        game_process.start()
-    
-
+        
+        
+        HanabiGame(num_players, players_info) 
  
  
 """ 
