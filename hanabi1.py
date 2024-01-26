@@ -29,8 +29,8 @@ class HanabiGame:
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
         self.suites = m.get_suites()
         self.discard = []
-        self.players_cards = m.get_players_cards
-  
+        self.players_cards = m.get_players_cards()
+        self.tokens = m.get_tokens()
         self.deck_sem = th.Lock() 
         self.suites_sem = th.Lock()
         self.playersCards_sem = th.Lock()
