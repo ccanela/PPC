@@ -10,11 +10,7 @@ import sysv_ipc as ipc
 import threading as th
 import psutil
 import multiprocessing as mp 
-<<<<<<< HEAD:hanabi - Copie.py
-#from test_button2 import Button
-=======
 # from test_button2 import Button
->>>>>>> refs/remotes/origin/main:hanabi1.py
 
 class State:
     WAITING = 1
@@ -118,8 +114,6 @@ class HanabiGame:
         # Check if the third Storm token is turned lightning-side-up
 
         if self.storm_tk == 0:
-            pid_players = self.get_pids("player1.py")
-            #verif nom process
             print(pid_players)
             for pid in pid_players:
                 try:
@@ -148,17 +142,7 @@ class HanabiGame:
             pids = get_pids("player.py")
             return "last turn" """
 
-    def get_pids(self, process_name): 
-        pids = []
-        print(psutil.process_iter(['pid', 'name']))
-        for proc in psutil.process_iter(['pid', 'name']):
-            print(proc)
-            print(proc.info)
-            print(proc.info["name"])
-            if process_name in proc.info['name']:    
-                print("oui")    
-                pids.append(proc.info['pid'])
-        return pids
+
 
     def player_turn(self, player_num):
         # Lógica específica del turno del jugador

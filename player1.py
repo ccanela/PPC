@@ -9,6 +9,7 @@ from hanabi1 import HanabiGame as hg
 
 
 def player_process(player_num):
+    current_pid = os.getpid()
     signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
     player_name = f"player{player_num}"
@@ -22,6 +23,7 @@ def player_process(player_num):
     server_socket_int.listen(1)
     client_socket_int, address = server_socket_int.accept()
 
+    
     running = True
     while running:
         
