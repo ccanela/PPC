@@ -39,6 +39,7 @@ class HanabiGame:
         
         self.send("start")                        
         self.init_deck(num_players)
+        self.start_game()
                        
         
 
@@ -148,13 +149,20 @@ class HanabiGame:
     def player_turn(self, player_num):
         # Lógica específica del turno del jugador
         # Aquí debes usar self.pipe para enviar y recibir información del proceso del juego
+        
         pass
 
     def start_game(self):
-       
+        players = self.players_info.keys()
+        i_player = 0
         running = True
         while running:
-            pass
+            current_player = players[i_player]
+            self.send(current_player)
+            self.player_turn(current_player)
+            self.check_end()            
+            i_player = (i_player + 1) % len(players)
+            
             # Lógica del juego aquí
             # Manejar la comunicación con los jugadores a través de los sockets y las colas
 
@@ -164,23 +172,23 @@ if __name__ == "__main__":
     players_cards = m.get_players_cards()
     num_players = len(players_cards.keys())
     
-    if len(sys.argv) < 2:
-        print("required index argument missing, terminating.", file=sys.stderr)
-        sys.exit(1)
+    # if len(sys.argv) < 2:
+    #     print("required index argument missing, terminating.", file=sys.stderr)
+    #     sys.exit(1)
         
-    try:
-        num_players = int(sys.argv[1])
-    except ValueError:
-        print("bad index argument: {}, terminating.".format(sys.argv[1]), file=sys.stderr)
-        sys.exit(2)
+    # try:
+    #     num_players = int(sys.argv[1])
+    # except ValueError:
+    #     print("bad index argument: {}, terminating.".format(sys.argv[1]), file=sys.stderr)
+    #     sys.exit(2)
         
-    if num_players < 0:
-        print("negative index argument: {}, terminating.".format(num_players), file=sys.stderr)
-        sys.exit(3)
+    # if num_players < 0:
+    #     print("negative index argument: {}, terminating.".format(num_players), file=sys.stderr)
+    #     sys.exit(3)
     
-    elif num_players > 5:
-        print("bad index argument (too many players): {}, terminating.".format(num_players), file=sys.stderr)
-        sys.exit(4)    
+    # elif num_players > 5:
+    #     print("bad index argument (too many players): {}, terminating.".format(num_players), file=sys.stderr)
+    #     sys.exit(4)    
     
     players_connected = 0 
     players_info = {}
