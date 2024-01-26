@@ -29,20 +29,16 @@ class HanabiGame:
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
         self.suites = m.get_suites()
         self.discard = []
-        self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
-        self.info_tk = mp.Value('i', num_players + 3)  
-        self.storm_tk = mp.Value('i', 3)  
+        self.players_cards = m.get_players_cards
+  
         self.deck_sem = th.Lock() 
         self.suites_sem = th.Lock()
         self.playersCards_sem = th.Lock()
         self.tokens_sem = th.Lock()
-        self.playerStates_sem = [th.Lock() for _ in range(num_players)]
         self.players_info = players_info
         
         self.send("start")                        
         self.init_deck(num_players)
-        self.start_game()
-        
                        
         
 
@@ -63,8 +59,6 @@ class HanabiGame:
                 self.playersCards_sem.acquire()
                 self.players_cards[f"player{player+1}"].append(card)
                 self.playersCards_sem.release()
-        
-        self.send("initCards")    
 
     def send(self, mess, player="all"):
         if player == "all":
@@ -151,25 +145,16 @@ class HanabiGame:
         os._exit(0)          
 
        
-    def player_turn(self, playerId):
+    def player_turn(self, player_num):
         # Lógica específica del turno del jugador
         # Aquí debes usar self.pipe para enviar y recibir información del proceso del juego
         pass
 
     def start_game(self):
-        players = self.players_info.keys()
-        i_player = 0
+       
         running = True
         while running:
-            current_player = players[i_player] 
-            self.send(current_player)
-            self.player_turn(current_player)
-            data = self.receive(current_player)
-            while data != "end of the turn":
-                data = self.receive(current_player)    
-            i_player = (i_player + 1) % len(players) 
-            self.check_end()
-               
+            pass
             # Lógica del juego aquí
             # Manejar la comunicación con los jugadores a través de los sockets y las colas
 
