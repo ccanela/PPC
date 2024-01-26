@@ -8,15 +8,26 @@ import os
 import signal
 import sysv_ipc as ipc
 import threading as th
-import psutil
+from multiprocessing.managers import BaseManager
+from queue import Queue
 import multiprocessing as mp 
 #from test_button2 import Button
-    
+
+class RemoteManager(BaseManager): pass
+
+RemoteManager.register('get_suites')
+RemoteManager.register('get_players_cards')
+
+m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
+m.connect()
+
+
 class HanabiGame:
     def __init__(self, num_players, players_info):
+        
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
-        self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
+        self.suites = m.get_suites()
         self.discard = []
         self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
         self.info_tk = mp.Value('i', num_players + 3)  
@@ -164,6 +175,9 @@ class HanabiGame:
 
  
 if __name__ == "__main__":
+
+    players_cards = m.get_players_cards()
+    num_players = len(players_cards.keys())
     
     if len(sys.argv) < 2:
         print("required index argument missing, terminating.", file=sys.stderr)
