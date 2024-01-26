@@ -71,7 +71,8 @@ def window_player(num_player, num_players, players_cards):
     screen_height = 600
     screen = pygame.display.set_mode((screen_width, screen_height))
     screen.fill((200, 255, 255))
-
+    hand = players_cards.pop(f"player{num_player}")
+    print(hand)
     card_positions = {
         1: (50, 50),
         2: (screen_width - 400, 50),
@@ -81,24 +82,18 @@ def window_player(num_player, num_players, players_cards):
     }
 
     buttons = []
-    for player, cards in players_cards.items():
-        try:
-            player_num = int(player.replace('player', ''))
-        except ValueError:
-            continue  # Si no se puede convertir a un número, omitir este jugador
+    for index, (player, cards) in enumerate(players_cards.items(), start=1):
 
-        if player_num != num_player:
-            for i, card in enumerate(cards):
-                card_image = f'{card["number"]}_{card["color"]}.png'
-                position = (card_positions.get(player_num, (0, 0))[0] + i * 60, card_positions.get(player_num, (0, 0))[1])
-                button = Button(card_image, position, action=info_card, scale=0.1, value=(player_num, card["number"], card["color"]))
-                buttons.append(button)
-        else: 
-            for i, card in enumerate(cards):
-                card_image = f'{card["number"]}_{card["color"]}.png'
-                position = (card_positions.get(5, (0, 0))[0] + i * 60, card_positions.get(5, (0, 0))[1])
-                button = Button(card_image, position, action=info_card, scale=0.1, value=(player_num, card["number"], card["color"]))
-                buttons.append(button)
+        for i, card in enumerate(cards):
+            card_image = f'{card["number"]}_{card["color"]}.png'
+            position = (card_positions.get(index, (0, 0))[0] + i * 60, card_positions.get(index, (0, 0))[1])
+            button = Button(card_image, position, action=info_card, scale=0.1, value=(player, card["number"], card["color"]))
+            buttons.append(button)
+        for i, card in enumerate(hand.values()):
+            card_image = f'{card["number"]}_{card["color"]}.png'
+            position = (card_positions.get(5, (0, 0))[0] + i * 60, card_positions.get(5, (0, 0))[1])
+            button = Button(card_image, position, action=info_card, scale=0.1, value=(player, card["number"], card["color"]))
+            buttons.append(button)
 
     pygame.display.flip()
     return buttons, screen
