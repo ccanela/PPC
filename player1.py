@@ -12,6 +12,7 @@ def player_process(player_num):
     signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
     player_name = f"player{player_num}"
+    print("1")
     # player_hand = hg.players_cards[player_name]
     HOST_int = "localhost"
     PORT_int = 6666 + int(player_num)
@@ -110,6 +111,7 @@ def receive(socket_connexion, buffer_size=1024):
         
    
 def end_game(signum, frame):
+    print("2")
     if signum == signal.SIGUSR1:
         print(f"Signal received: {signum}. Game status: Victory!!!")
         #timer ou affichage
@@ -137,6 +139,4 @@ if __name__ == "__main__" :
             data = receive(socket_client)
         print("Starting game")
         
-        game_process = mp.Process(target=player_process, args=(sys.argv[1],))
-        game_process.start()
-                     
+        player_process(sys.argv[1])                          

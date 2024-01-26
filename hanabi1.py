@@ -34,12 +34,15 @@ class HanabiGame:
         self.playerStates_sem = [th.Semaphore(0) for _ in range(num_players)]
         self.player_sockets = sockets
         
+        # Tests signals
         self.storm_tk = 0
         self.send("1") 
-        self.check_end()       
-        self.init_deck(num_players)
-        
+        self.check_end()
+               
+        self.init_deck(num_players)       
         print(self.players_cards)
+        
+        
 
     def init_deck(self, num_players):
         numbers = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
@@ -111,8 +114,9 @@ class HanabiGame:
         # Check if the third Storm token is turned lightning-side-up
 
         if self.storm_tk == 0:
-            print("1")
-            pid_players = self.get_pids("player.py")    #verif nom process
+            pid_players = self.get_pids("player1.py")
+            #verif nom process
+            print(pid_players)
             for pid in pid_players:
                 try:
                     os.kill(pid, signal.SIGUSR2)
@@ -122,7 +126,7 @@ class HanabiGame:
                 except PermissionError:
                     print(f"Error: No se tiene permiso para enviar la señal al proceso con PID {pid}")
 
-        elif all(card['color'] == 5 for card in self.suites.values()):
+        elif all(card == 0 for card in self.suites.values()):
             print("2")
             pid_players = self.get_pids("player.py")
             for pid in pid_players:
@@ -142,8 +146,13 @@ class HanabiGame:
 
     def get_pids(self, process_name): 
         pids = []
+        print(psutil.process_iter(['pid', 'name']))
         for proc in psutil.process_iter(['pid', 'name']):
-            if process_name in proc.info['name']:
+            print(proc)
+            print(proc.info)
+            print(proc.info["name"])
+            if process_name in proc.info['name']:    
+                print("oui")    
                 pids.append(proc.info['pid'])
         return pids
 
