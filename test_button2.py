@@ -89,7 +89,7 @@ def window_player(num_player, num_players, players_cards):
             position = (card_positions.get(index, (0, 0))[0] + i * 60, card_positions.get(index, (0, 0))[1])
             button = Button(card_image, position, action=info_card, scale=0.1, value=(player, card["number"], card["color"]))
             buttons.append(button)
-        for i, card in enumerate(hand.values()):
+        for i, card in enumerate(hand):
             card_image = f'{card["number"]}_{card["color"]}.png'
             position = (card_positions.get(5, (0, 0))[0] + i * 60, card_positions.get(5, (0, 0))[1])
             button = Button(card_image, position, action=info_card, scale=0.1, value=(player, card["number"], card["color"]))
