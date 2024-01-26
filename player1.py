@@ -7,6 +7,7 @@ import multiprocessing as mp
 from hanabi1 import HanabiGame as hg
 
 
+<<<<<<< HEAD
 
 def player_process(player_num):
     current_pid = os.getpid()
@@ -23,6 +24,12 @@ def player_process(player_num):
     server_socket_int.listen(1)
     client_socket_int, address = server_socket_int.accept()
 
+=======
+def player_process(playerId):
+        
+    signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
+    signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
+>>>>>>> refs/remotes/origin/main
     
     running = True
     while running:
@@ -127,18 +134,21 @@ def end_game(signum, frame):
 if __name__ == "__main__" :
     key = 100
     mq = ipc.MessageQueue(key, ipc.IPC_CREAT)
+    pid = os.getpid()
     user()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_client :
         host = 'localhost'
-        numplayer = 0
         port = 12345
         socket_client.connect((host, port))
         print("Connected")
+        send(socket_client, str(pid))
+        playerId = receive(socket_client)
+        print(f"Tu es le {playerId}")
     
         data = receive(socket_client)
-        while data != "1":
-            print("c")
+        while data != "start":
             data = receive(socket_client)
+            
         print("Starting game")
         
-        player_process(sys.argv[1])                          
+        player_process(playerId)                          
