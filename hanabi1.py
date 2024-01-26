@@ -27,9 +27,9 @@ class HanabiGame:
         
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
-        #self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
+        self.suites = m.get_suites()
         self.discard = []
-        #self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
+        self.players_cards = m.players_cards
         #self.info_tk = 
         #self.storm_tk = mp.Value('i', 3)  
         self.deck_sem = th.Semaphore(1) 
