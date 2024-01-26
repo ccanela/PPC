@@ -8,7 +8,8 @@ import os
 import signal
 import sysv_ipc as ipc
 import threading as th
-import psutil
+from multiprocessing.managers import BaseManager
+from queue import Queue
 import multiprocessing as mp 
 #from test_button2 import Button
 
@@ -18,15 +19,15 @@ class State:
     
 class HanabiGame:
     def __init__(self, num_players, players_info):
+        
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
-        self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
+        #self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
         self.discard = []
-        self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
-        self.discarded_cards = []
-        self.info_tk = mp.Value('i', num_players + 3)  
+        #self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
+        #self.info_tk =  
         self.playerStates = [State.WAITING for _ in range(num_players)]
-        self.storm_tk = mp.Value('i', 3)  
+        #self.storm_tk = mp.Value('i', 3)  
         self.deck_sem = th.Semaphore(1) 
         self.suites_sem = th.Semaphore(1)
         self.playersCards_sem = th.Semaphore(1)

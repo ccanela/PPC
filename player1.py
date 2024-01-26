@@ -7,29 +7,10 @@ import multiprocessing as mp
 from hanabi1 import HanabiGame as hg
 
 
-<<<<<<< HEAD
-
-def player_process(player_num):
-    current_pid = os.getpid()
-    signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
-    signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
-    player_name = f"player{player_num}"
-    print("1")
-    # player_hand = hg.players_cards[player_name]
-    HOST_int = "localhost"
-    PORT_int = 6666 + int(player_num)
-
-    server_socket_int = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket_int.bind((HOST_int, PORT_int))
-    server_socket_int.listen(1)
-    client_socket_int, address = server_socket_int.accept()
-
-=======
 def player_process(playerId):
         
     signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
->>>>>>> refs/remotes/origin/main
     
     running = True
     while running:

@@ -62,8 +62,8 @@ class Text:
         screen.blit(self.text_surface, self.text_rect)
 
 
-def hello():
-    print("Hello")
+def info_card(value):
+    print(value)
 
 def window_player(num_player, num_players, players_cards):
     # Configuración de la pantalla
@@ -91,15 +91,15 @@ def window_player(num_player, num_players, players_cards):
             for i, card in enumerate(cards):
                 card_image = f'{card["number"]}_{card["color"]}.png'
                 position = (card_positions.get(player_num, (0, 0))[0] + i * 60, card_positions.get(player_num, (0, 0))[1])
-                button = Button(card_image, position, action=hello, scale=0.1, value=(card["number"], card["color"]))
+                button = Button(card_image, position, action=info_card, scale=0.1, value=(player_num, card["number"], card["color"]))
                 buttons.append(button)
         else: 
             for i, card in enumerate(cards):
                 card_image = f'{card["number"]}_{card["color"]}.png'
                 position = (card_positions.get(5, (0, 0))[0] + i * 60, card_positions.get(5, (0, 0))[1])
-                button = Button(card_image, position, action=hello, scale=0.1, value=(card["number"], card["color"]))
+                button = Button(card_image, position, action=info_card, scale=0.1, value=(player_num, card["number"], card["color"]))
                 buttons.append(button)
-                
+
     pygame.display.flip()
     return buttons, screen
 
