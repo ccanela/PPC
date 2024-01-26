@@ -34,11 +34,9 @@ class HanabiGame:
         self.playerStates_sem = [th.Semaphore(1) for _ in range(num_players)]
         self.players_info = players_info
         
-        self.send("start")
-                        
-        self.init_deck(num_players)       
-        print(self.players_cards)
-        
+        self.send("start")                        
+        self.init_deck(num_players)
+                       
         
 
     def init_deck(self, num_players):
