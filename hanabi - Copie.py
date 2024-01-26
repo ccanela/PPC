@@ -10,7 +10,7 @@ import sysv_ipc as ipc
 import threading as th
 import psutil
 import multiprocessing as mp 
-from test_button2 import Button
+#from test_button2 import Button
 
 class State:
     WAITING = 1
