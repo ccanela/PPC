@@ -13,6 +13,7 @@ class RemoteManager(BaseManager): pass
 
 RemoteManager.register('get_tokens', callable=lambda:tokens)
 RemoteManager.register('get_suites', callable=lambda:suites)
+RemoteManager.register('get_players_cards', callable=lambda:players_cards)
 
 
 

@@ -13,10 +13,15 @@ from queue import Queue
 import multiprocessing as mp 
 #from test_button2 import Button
 
-class State:
-    WAITING = 1
-    PLAYING = 2
-    
+class RemoteManager(BaseManager): pass
+
+RemoteManager.register('get_suites')
+RemoteManager.register('get_players_cards')
+
+m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
+m.connect()
+
+
 class HanabiGame:
     def __init__(self, num_players, players_info):
         
@@ -25,8 +30,7 @@ class HanabiGame:
         #self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
         self.discard = []
         #self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
-        #self.info_tk =  
-        self.playerStates = [State.WAITING for _ in range(num_players)]
+        #self.info_tk = 
         #self.storm_tk = mp.Value('i', 3)  
         self.deck_sem = th.Semaphore(1) 
         self.suites_sem = th.Semaphore(1)
@@ -158,6 +162,9 @@ class HanabiGame:
 
  
 if __name__ == "__main__":
+
+    players_cards = m.get_players_cards()
+    num_players = len(players_cards.keys())
     
     if len(sys.argv) < 2:
         print("required index argument missing, terminating.", file=sys.stderr)
