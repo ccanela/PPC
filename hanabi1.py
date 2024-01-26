@@ -17,6 +17,7 @@ class RemoteManager(BaseManager): pass
 
 RemoteManager.register('get_suites')
 RemoteManager.register('get_players_cards')
+RemoteManager.register('get_tokens')
 
 m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
 m.connect()
@@ -58,7 +59,11 @@ class HanabiGame:
                 card = self.deck.pop()
                 self.deck_sem.release()
                 self.playersCards_sem.acquire()
-                self.players_cards[f"player{player+1}"].append(card)
+                print(type(self.players_cards))
+                print(f"player{player+1}")
+                key = "player" + str(player+1)
+                print(self.players_cards[key])
+                # self.players_cards[f"player{player+1}"].append(card)
                 self.playersCards_sem.release()
 
     def send(self, mess, player="all"):
