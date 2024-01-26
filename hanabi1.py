@@ -11,10 +11,6 @@ import threading as th
 import psutil
 import multiprocessing as mp 
 #from test_button2 import Button
-
-class State:
-    WAITING = 1
-    PLAYING = 2
     
 class HanabiGame:
     def __init__(self, num_players, players_info):
@@ -23,19 +19,19 @@ class HanabiGame:
         self.suites = mp.Manager().dict({color: 0 for color in self.colors}) 
         self.discard = []
         self.players_cards = {f"player{i+1}": [] for i in range(num_players)}
-        self.discarded_cards = []
         self.info_tk = mp.Value('i', num_players + 3)  
-        self.playerStates = [State.WAITING for _ in range(num_players)]
         self.storm_tk = mp.Value('i', 3)  
-        self.deck_sem = th.Semaphore(1) 
-        self.suites_sem = th.Semaphore(1)
-        self.playersCards_sem = th.Semaphore(1)
-        self.tokens_sem = th.Semaphore(1)
-        self.playerStates_sem = [th.Semaphore(1) for _ in range(num_players)]
+        self.deck_sem = th.Lock() 
+        self.suites_sem = th.Lock()
+        self.playersCards_sem = th.Lock()
+        self.tokens_sem = th.Lock()
+        self.playerStates_sem = [th.Lock() for _ in range(num_players)]
         self.players_info = players_info
         
         self.send("start")                        
         self.init_deck(num_players)
+        self.start_game()
+        
                        
         
 
@@ -56,6 +52,8 @@ class HanabiGame:
                 self.playersCards_sem.acquire()
                 self.players_cards[f"player{player+1}"].append(card)
                 self.playersCards_sem.release()
+        
+        self.send("initCards")    
 
     def send(self, mess, player="all"):
         if player == "all":
@@ -142,16 +140,25 @@ class HanabiGame:
         os._exit(0)          
 
        
-    def player_turn(self, player_num):
+    def player_turn(self, playerId):
         # Lógica específica del turno del jugador
         # Aquí debes usar self.pipe para enviar y recibir información del proceso del juego
         pass
 
     def start_game(self):
-       
+        players = self.players_info.keys()
+        i_player = 0
         running = True
         while running:
-            pass
+            current_player = players[i_player] 
+            self.send(current_player)
+            self.player_turn(current_player)
+            data = self.receive(current_player)
+            while data != "end of the turn":
+                data = self.receive(current_player)    
+            i_player = (i_player + 1) % len(players) 
+            self.check_end()
+               
             # Lógica del juego aquí
             # Manejar la comunicación con los jugadores a través de los sockets y las colas
 

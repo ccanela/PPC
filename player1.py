@@ -7,21 +7,40 @@ import multiprocessing as mp
 from hanabi1 import HanabiGame as hg
 
 
-def player_process(playerId):
+def player_process(playerId, socket_client, mq):
         
     signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
     
+    data = receive(socket_client)
+    while data != "initCards":
+        data = receive(socket_client)
+    print("Afficher la fenêtre")    
+    #Affichage de la fenêtre avec le jeu de départ
     running = True
     while running:
-        
-        pass
+        current_player = receive(socket_client)
+        while "player" not in current_player:
+            current_player= receive(socket_client)
+        #Afficher "It's the turn of {current_player}"    
+        if current_player == playerId:
+            #Afficher des options de jeu
+            action = turn(playerId)
+            mq.send(action, type=1)
+            mq.send("end of the turn", type=3)
+            send(socket_client, "end of the turn")
+            #Afficher fin du tour
+                                    
+        else:
+            action, t = mq.receive(type=1)
+            print(f"{current_player} choose to {action}")
+            #Afficher "{current_player} choose to {action}"
+            mess, t = mq.receive(type=3)      
         # Lógica del jugador aquí
         # Manejar la comunicación con el juego a través del pipe y el socket
         
 def turn(player):
-        print(f"It's {player}'s turn.")
-        
+               
         if hg.info_tk < 0 :
             #Arreter d'afficher l'option give a hint
             pass
@@ -32,18 +51,15 @@ def turn(player):
         action = input("Choose an action (give hint or play card): ")
         # il manque: check if info_tk > 0 
         if action == "give hint":
-            # Ensure it's not another player's turn
-            # Implement the logic for giving a hint here
             give_hint(player)
 
         elif action == "play card":
-            # Implement the logic for playing a card here
-            hg.lay_card(player)
-        
-        elif action == "discard":
-            hg.discard(player)    
+            hg.play_card(player)
+  
         else:
             print("Invalid action. Please try again.")
+        
+        return action    
 
 def give_hint(player):
     #avant d'appeler la fonction il faut voir s'il y a de info_tk disponibles c-a-d info_tk >  
@@ -132,4 +148,4 @@ if __name__ == "__main__" :
             
         print("Starting game")
         
-        player_process(playerId)                          
+        player_process(playerId, socket_client, mq)                          
