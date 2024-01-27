@@ -9,9 +9,12 @@ from hanabi1 import HanabiGame as hg
 from test_button2 import *
 
 class RemoteManager(BaseManager): pass
-RemoteManager.register('get_players_cards')
 RemoteManager.register('get_suites')
-#RemoteManager.register('get_tokens')
+RemoteManager.register('get_players_cards')
+RemoteManager.register('get_tokens')
+RemoteManager.register('set_players_cards')
+RemoteManager.register('set_tokens')
+RemoteManager.register('set_suites')
 
 m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
 m.connect()
