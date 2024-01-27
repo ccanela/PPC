@@ -40,7 +40,7 @@ class HanabiGame:
         self.players_info = players_info
         
         self.send("start")                        
-        self.init_deck(num_players)
+        # self.init_deck(num_players)
         self.start_game()
                        
         
@@ -164,7 +164,7 @@ class HanabiGame:
                 end = True
 
     def start_game(self):
-        players = self.players_info.keys()
+        players = list(self.players_info.keys())
         i_player = 0
         running = True
         while running:
@@ -178,6 +178,7 @@ class HanabiGame:
 if __name__ == "__main__":
 
     players_cards = m.get_players_cards()
+    print(type(players_cards._getvalue()))
     num_players = len(players_cards.keys())
     
     # if len(sys.argv) < 2:
