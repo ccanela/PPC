@@ -17,6 +17,9 @@ class RemoteManager(BaseManager): pass
 RemoteManager.register('get_suites')
 RemoteManager.register('get_players_cards')
 RemoteManager.register('get_tokens')
+RemoteManager.register('set_players_cards')
+RemoteManager.register('set_tokens')
+RemoteManager.register('set_suites')
 
 m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
 m.connect()
@@ -27,15 +30,14 @@ class HanabiGame:
         
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
-        self.suites = m.get_suites()
+        #self.suites = m.get_suites() je crois que ça n'a pas de sens parce que c'est dans la memoire partagé pas dans la classe 
         self.discard = []
-        self.players_cards = m.get_players_cards()
-        #self.players_cards._getvalue()
-        self.tokens = m.get_tokens()
-        self.deck_sem = th.Lock() 
-        self.suites_sem = th.Lock()
-        self.playersCards_sem = th.Lock()
-        self.tokens_sem = th.Lock()
+        #self.players_cards = m.get_players_cards()
+        #self.tokens = m.get_tokens()
+        self.deck_mutex = th.Lock() 
+        self.suites_mutex = th.Lock()
+        self.playersCards_mutex = th.Lock()
+        self.tokens_mutex = th.Lock()
         self.players_info = players_info
         
         self.send("start")                        
@@ -47,20 +49,22 @@ class HanabiGame:
         numbers = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
         num_cards_in_hand = 5
         
-        self.deck_sem.acquire()
+        self.deck_mutex.acquire()
         self.deck = [{'color': color, 'number': number, 'hint_color': False, 'hint_number': False} for color in self.colors for number in numbers]
         random.shuffle(self.deck)
-        self.deck_sem.release()
+        self.deck_mutex.release()
 
+        self.playersCards_mutex.acquire()
+        
         for player in range(num_players):
+            hand = []
             for _ in range(num_cards_in_hand):
-                self.deck_sem.acquire()
+                self.deck_mutex.acquire()
                 card = self.deck.pop()
-                self.deck_sem.release()
-                self.playersCards_sem.acquire()
-                self.hands = self.players_cards._getvalue()
-                self.hands[f"player{player+1}"].append(card)
-                self.playersCards_sem.release()
+                self.deck_mutex.release()
+                hand.append(card)
+            m.set_players_cards(f"player{player+1}", hand)
+            self.playersCards_mutex.release()
 
     def send(self, mess, player="all"):
         if player == "all":
@@ -97,9 +101,9 @@ class HanabiGame:
         card_number = card['number']
 
         if card_number == self.suites[card_color] + 1:
-            self.suites_sem.acquire()
-            self.suites[card_color] = card_number
-            self.suites_sem.release()
+            self.suites_mutex.acquire()
+            m.set_suites(card_color,card_number)
+            self.suites_mutex.release()
             if card_number == 5: 
                 self.tokens_sem.acquire()
                 info_tk += 1 
