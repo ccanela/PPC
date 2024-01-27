@@ -39,7 +39,8 @@ class Button:
             if self.hovered:
                 print("Button clicked!")
                 if self.action: 
-                    self.action()
+
+                    self.action(self.value)
 class Text:
     def __init__(self, text, position, font_name=None, font_size=50, color=(0, 0, 0), box_color=None, box_padding=10):
         self.font = pygame.font.Font(font_name, font_size)
@@ -65,61 +66,89 @@ class Text:
 def info_card(value):
     print(value)
 
-def window_player(num_player, num_players, players_cards):
+def window_player(num_player, players_cards, suites):
+    pygame.init()
+    pygame.font.init()
+
     # Configuración de la pantalla
-    screen_width = 800
-    screen_height = 600
-    screen = pygame.display.set_mode((screen_width, screen_height))
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    screen_width, screen_height = pygame.display.get_surface().get_size()
     screen.fill((200, 255, 255))
     hand = players_cards.pop(f"player{num_player}")
     print(hand)
     card_positions = {
         1: (50, 50),
-        2: (screen_width - 400, 50),
-        3: (screen_width - 400, screen_height - 400),
-        4: (50 , screen_height - 400),
-        5: (screen_width//2 - 200, screen_height - 50)
+        2: (screen_width*0.6, 50),
+        3: (screen_width*0.6, screen_height - 300),
+        4: (50 , screen_height - 300),
+        5: (screen_width//2 - 200, screen_height - 100)
     }
 
     buttons = []
+    texts = []
     for index, (player, cards) in enumerate(players_cards.items(), start=1):
 
         for i, card in enumerate(cards):
             card_image = f'{card["number"]}_{card["color"]}.png'
-            position = (card_positions.get(index, (0, 0))[0] + i * 60, card_positions.get(index, (0, 0))[1])
+            position = (card_positions.get(index, (0, 0))[0] + i * screen_width/15, card_positions.get(index, (0, 0))[1])
             button = Button(card_image, position, action=info_card, scale=0.1, value=(player, card["number"], card["color"]))
             buttons.append(button)
+        text = Text(player, (position[0]-100, position[1] - 20) , font_size=20, box_color=(255, 255, 255), box_padding=10)
+        texts.append(text)
+
         for i, card in enumerate(hand):
-            card_image = f'{card["number"]}_{card["color"]}.png'
-            position = (card_positions.get(5, (0, 0))[0] + i * 60, card_positions.get(5, (0, 0))[1])
-            button = Button(card_image, position, action=info_card, scale=0.1, value=(player, card["number"], card["color"]))
+            card_image = 'back_card.png'
+            position = (card_positions.get(5, (0, 0))[0] + i * screen_width/15, card_positions.get(5, (0, 0))[1])
+            button = Button(card_image, position, """ action=play_card """, scale=0.1, value=(f"player{num_player}", card["number"], card["color"]))
+            buttons.append(button)
+        for i, (color, num) in enumerate(suites.items()): 
+            card_image = f"{num}_{color}.png"
+            position = (screen_width*0.30 + i*screen_width/12, screen_height*0.35)
+            button = Button(card_image, position, scale=0.1)
             buttons.append(button)
 
-    pygame.display.flip()
-    return buttons, screen
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                running = False
+
+            for button in buttons:
+                button.handle_event(event)
+
+        screen.fill((200, 255, 255))
+        for button in buttons:
+            button.draw(screen)
+        for text in texts:
+            text.draw(screen)
+        pygame.display.flip()
+
+    pygame.quit()
+    return buttons, texts, screen
+
 
 # Uso de la función window_player
-players_cards = {'player1': [{'color': 'white', 'number': 5}, {'color': 'yellow', 'number': 2}, {'color': 'blue', 'number': 4}, {'color': 'blue', 'number': 5}, {'color': 'yellow', 'number': 2}], 'player2': [{'color': 'green', 'number': 2}, {'color': 'green', 'number': 1}, {'color': 'green', 'number': 2}, {'color': 'blue', 'number': 1}, {'color': 'green', 'number': 1}], 'player3': [{'color': 'red', 'number': 2}, {'color': 'yellow', 'number': 4}, {'color': 'yellow', 'number': 3}, {'color': 'green', 'number': 5}, {'color': 'yellow', 'number': 1}], 'player4': [{'color': 'white', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 1}, {'color': 'green', 'number': 3}, {'color': 'green', 'number': 4}], 'player5': [{'color': 'red', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 5}, {'color': 'white', 'number': 2}, {'color': 'yellow', 'number': 5}]}
-num_players = 4
-buttons, screen = window_player(2, num_players, players_cards)
-
-running = True
+""" players_cards = {'player1': [{'color': 'white', 'number': 5}, {'color': 'yellow', 'number': 2}, {'color': 'blue', 'number': 4}, {'color': 'blue', 'number': 5}, {'color': 'yellow', 'number': 2}], 'player2': [{'color': 'green', 'number': 2}, {'color': 'green', 'number': 1}, {'color': 'green', 'number': 2}, {'color': 'blue', 'number': 1}, {'color': 'green', 'number': 1}], 'player3': [{'color': 'red', 'number': 2}, {'color': 'yellow', 'number': 4}, {'color': 'yellow', 'number': 3}, {'color': 'green', 'number': 5}, {'color': 'yellow', 'number': 1}], 'player4': [{'color': 'white', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 1}, {'color': 'green', 'number': 3}, {'color': 'green', 'number': 4}], 'player5': [{'color': 'red', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 5}, {'color': 'white', 'number': 2}, {'color': 'yellow', 'number': 5}]}
+suites = {'red': 0, 'blue': 0, 'green': 0, 'yellow': 0, 'white': 0}
+buttons, texts, screen = window_player(5, players_cards, suites)
+ """
+""" running = True
 while running:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             running = False
 
-        # Manejar eventos para cada botón
         for button in buttons:
             button.handle_event(event)
 
-    # Actualizar y dibujar botones en cada iteración del bucle
     screen.fill((200, 255, 255))
     for button in buttons:
         button.draw(screen)
+    for text in texts:
+        text.draw(screen)
     pygame.display.flip()
 
-pygame.quit()
+pygame.quit() """
 
 """ players_cards = {'player1': [{'color': 'white', 'number': 5}, {'color': 'yellow', 'number': 2}, {'color': 'blue', 'number': 4}, {'color': 'blue', 'number': 5}, {'color': 'yellow', 'number': 2}], 'player2': [{'color': 'green', 'number': 2}, {'color': 'green', 'number': 1}, {'color': 'green', 'number': 2}, {'color': 'blue', 'number': 1}, {'color': 'green', 'number': 1}], 'player3': [{'color': 'red', 'number': 2}, {'color': 'yellow', 'number': 4}, {'color': 'yellow', 'number': 3}, {'color': 'green', 'number': 5}, {'color': 'yellow', 'number': 1}], 'player4': [{'color': 'white', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 1}, {'color': 'green', 'number': 3}, {'color': 'green', 'number': 4}], 'player5': [{'color': 'red', 'number': 4}, {'color': 'blue', 'number': 3}, {'color': 'red', 'number': 5}, {'color': 'white', 'number': 2}, {'color': 'yellow', 'number': 5}]}
 pygame.init()

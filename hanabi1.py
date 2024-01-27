@@ -1,17 +1,16 @@
-import pygame 
 import sys 
-import paramiko
-import errno
+#import paramiko
+#import errno
 import random
 import socket
 import os 
 import signal
-import sysv_ipc as ipc
+#import sysv_ipc as ipc
 import threading as th
 from multiprocessing.managers import BaseManager
 from queue import Queue
 import multiprocessing as mp 
-#from test_button2 import Button
+from test_button2 import *
 
 class RemoteManager(BaseManager): pass
 
@@ -31,6 +30,7 @@ class HanabiGame:
         self.suites = m.get_suites()
         self.discard = []
         self.players_cards = m.get_players_cards()
+        self.players_cards._getvalue()
         print(type(self.players_cards))
         self.tokens = m.get_tokens()
         self.deck_sem = th.Lock() 
@@ -178,7 +178,6 @@ class HanabiGame:
 if __name__ == "__main__":
 
     players_cards = m.get_players_cards()
-    print(type(players_cards._getvalue()))
     num_players = len(players_cards.keys())
     
     # if len(sys.argv) < 2:

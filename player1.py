@@ -4,8 +4,17 @@ import os
 import signal 
 import sys
 import multiprocessing as mp
+from multiprocessing.managers import BaseManager
 from hanabi1 import HanabiGame as hg
+from test_button2 import *
 
+class RemoteManager(BaseManager): pass
+RemoteManager.register('get_players_cards')
+RemoteManager.register('get_suites')
+#RemoteManager.register('get_tokens')
+
+m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
+m.connect()
 
 def player_process(playerId, socket_client, mq):
         
@@ -15,7 +24,12 @@ def player_process(playerId, socket_client, mq):
     data = receive(socket_client)
     while data != "initCards":
         data = receive(socket_client)
-    print("Afficher la fenêtre")    
+    print("Afficher la fenêtre") 
+    players_cards = m.get_players_cards()
+    players_cards._getvalue()
+    suites = m.get_suites()
+    suites._getvalue()
+    window_player(playerId, players_cards, suites)   
     #Affichage de la fenêtre avec le jeu de départ
     running = True
     while running:

@@ -16,7 +16,6 @@ RemoteManager.register('get_suites', callable=lambda:suites)
 RemoteManager.register('get_players_cards', callable=lambda:players_cards)
 
 
-
 m = RemoteManager(address=('', 50000), authkey=b'abracadabra')
 s = m.get_server()
 s.serve_forever()
