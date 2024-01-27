@@ -29,17 +29,17 @@ def player_process(playerId, socket_client, mq):
     players_cards._getvalue()
     suites = m.get_suites()
     suites._getvalue()
-    window_player(playerId, players_cards, suites)   
+    Window(playerId, players_cards, suites)   
     #Affichage de la fenêtre avec le jeu de départ
     running = True
     while running:
         current_player = receive(socket_client)
         while "player" not in current_player:
             current_player= receive(socket_client)
-        #Afficher "It's the turn of {current_player}"    
+        print(f"It's the turn of {current_player}")    
         if current_player == playerId:
-            #Afficher des options de jeu
             action = turn(playerId)
+            #Afficher des options de jeu
             mq.send(action, type=1)
             mq.send("end of the turn", type=3)
             send(socket_client, "end of the turn")
@@ -54,26 +54,24 @@ def player_process(playerId, socket_client, mq):
         # Manejar la comunicación con el juego a través del pipe y el socket
         
 def turn(player):
-               
-        if hg.info_tk < 0 :
-            #Arreter d'afficher l'option give a hint
-            pass
+        print("Which action do you want to do?")
+        info_tk = m.get_tokens
+        info_tk._getvalue()['info_tk']
+        if info_tk > 0 :
+            action = int(input("1. Give a hint\n2. Play a card"))
         else :
-            #Afficher l'option give a hint    
-            pass
+            action = int(input("You don't have any info tokens left, you can only play a card. Type 2 to continue"))   
         
-        action = input("Choose an action (give hint or play card): ")
-        # il manque: check if info_tk > 0 
-        if action == "give hint":
+        if action == 1:
             give_hint(player)
-
-        elif action == "play card":
-            hg.play_card(player)
-  
+        
+        elif action == 2:
+            #hg.play_card(player)
+            pass 
         else:
             print("Invalid action. Please try again.")
-        
-        return action    
+            turn(player)
+          
 
 def give_hint(player):
     #avant d'appeler la fonction il faut voir s'il y a de info_tk disponibles c-a-d info_tk >  

@@ -30,8 +30,7 @@ class HanabiGame:
         self.suites = m.get_suites()
         self.discard = []
         self.players_cards = m.get_players_cards()
-        self.players_cards._getvalue()
-        print(type(self.players_cards))
+        #self.players_cards._getvalue()
         self.tokens = m.get_tokens()
         self.deck_sem = th.Lock() 
         self.suites_sem = th.Lock()
@@ -44,7 +43,6 @@ class HanabiGame:
         self.start_game()
                        
         
-
     def init_deck(self, num_players):
         numbers = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
         num_cards_in_hand = 5
@@ -60,11 +58,8 @@ class HanabiGame:
                 card = self.deck.pop()
                 self.deck_sem.release()
                 self.playersCards_sem.acquire()
-                print(type(self.players_cards))
-                print(f"player{player+1}")
-                key = "player" + str(player+1)
-                print(self.players_cards[key])
-                # self.players_cards[f"player{player+1}"].append(card)
+                self.hands = self.players_cards._getvalue()
+                self.hands[f"player{player+1}"].append(card)
                 self.playersCards_sem.release()
 
     def send(self, mess, player="all"):
@@ -133,9 +128,9 @@ class HanabiGame:
                     os.kill(pid, signal.SIGUSR2)
                     print(f"Signal {signal.SIGUSR2} sent to process with PID: {pid}")
                 except ProcessLookupError:
-                    print(f"Error: No se puede encontrar el proceso con PID {pid}")
+                    print(f"Error: Process with PID: {pid} NOT FOUND")
                 except PermissionError:
-                    print(f"Error: No se tiene permiso para enviar la señal al proceso con PID {pid}")
+                    print(f"Error: No permission to send a signal to the process {pid}")
 
         elif all(card == 0 for card in self.suites.values()):
             print("2")
@@ -145,9 +140,9 @@ class HanabiGame:
                     os.kill(pid, signal.SIGUSR1)
                     print(f"Signal {signal.SIGUSR1} sent to process with PID: {pid}")
                 except ProcessLookupError:
-                    print(f"Error: No se puede encontrar el proceso con PID {pid}")
+                    print(f"Error: Process with PID: {pid} NOT FOUND")
                 except PermissionError:
-                    print(f"Error: No se tiene permiso para enviar la señal al proceso con PID {pid}")
+                    print(f"Error: No permission to send a signal to the process {pid}")
         
         os._exit(0)          
 
@@ -164,7 +159,8 @@ class HanabiGame:
                 end = True
 
     def start_game(self):
-        players = self.players_info.keys()
+        players = list(self.players_info.keys())
+        print("hola1")
         i_player = 0
         running = True
         while running:
