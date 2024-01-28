@@ -5,7 +5,6 @@ import signal
 import sys
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
-from hanabi1 import HanabiGame as hg
 from test_button2 import *
 
 class RemoteManager(BaseManager): pass
@@ -31,7 +30,6 @@ def player_process(playerId, socket_client, mq):
     players_cards = m.get_players_cards().copy()
     suites = m.get_suites().copy()
     #Window(playerId, players_cards, suites)   
-    #Nina si tu enleves le commentaire ça marche? Moi ça n'affiche que pour un joueur, l'autre a la fenêtre vide
     print("hola1")
     running = True
     while running:
@@ -43,21 +41,17 @@ def player_process(playerId, socket_client, mq):
         print(f"It's the turn of {current_player}")    
         if current_player == playerId:
             action = turn(playerId)
-            #Afficher des options de jeu
             mq.send(action, type=1)
             mq.send("end of the turn", type=3)
             send(socket_client, "end of the turn")
-            #Afficher fin du tour
                                     
         else:
             action, t = mq.receive(type=1)
             print(f"{current_player} choose to {action}")
-            #Afficher "{current_player} choose to {action}"
             mess, t = mq.receive(type=3)      
-        # Lógica del jugador aquí
-        # Manejar la comunicación con el juego a través del pipe y el socket
+    
         
-def turn(player):
+def turn(playerId):
         print("Which action do you want to do?\n")
         #mutex
         tokens = m.get_tokens().copy()
@@ -69,50 +63,58 @@ def turn(player):
             #test qu'il met pas de 1? 
 
         if action == 1:
-            give_hint(player)
+            give_hint(playerId)
         
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
             send("play card")
             #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
-            #hg.play_card(player)  #on ne peut pas lancer la fonction comme ça 
+
             pass 
         else:
             print("Invalid action. Please try again.")
-            turn(player)
+            turn(playerId)
           
 
 def give_hint(player):
-    
-    #hg.tokens_sem.acquire() 
     info_tk = m.get_tokens()._getvalue()["info_tk"]
     print(f"{info_tk-1} info tokens left")
-    #Nina j'ai un segmentation fault juste après ça 
-    m.set_tokens("info_tk", info_tk -1)      
-    #hg.tokens_sem.release()
-    
-    #Arreter d'afficher les boutons d'option
-    #Afficher indication pour choisir carte puis piece number or color
-    """ 
+    m.set_tokens("info_tk", info_tk-1)
+
+    # Ask the player who they want to give a hint to
+    players = list(m.get_players_cards().copy().keys())
+    players.remove(playerId)
+    print("Which player do you want to give a hint to?")
+    i_teammate = int(input("".join(f"{i+1}. {player}\n" for i, player in enumerate(players))))
+    teammate = players[i_teammate-1]
+    # Get the teammate's cards
+    players_cards = m.get_players_cards().copy()
+
+    # Show the teammate's cards
+    print("Your teammate's cards are: ")
+    print(players_cards[teammate])
+
+    # Ask the player if they want to give a number or color hint
+    hint_type = input("Do you want to give a number or color hint?")
+
+    # Ask the player the index of the card they want to give a hint about
+    card_index = int(input("Enter the index of the card you want to give a hint about (from 1 to 5)"))
+    card = players_cards[teammate][card_index - 1]
+
     if hint_type == "color":
         color = card['color']
-        cards_of_color = [card for card in self.players_cards[teammate] if card['color'] == color]
-        self.playersCards_sem.acquire()
-        for card in self.players_cards[teammate]:
+        cards_of_color = [card for card in players_cards[teammate] if card['color'] == color]
+        for card in players_cards[teammate]:
             if card in cards_of_color:
                 card["hint_color"] = True
-        self.playersCards_sem.release()        
-                    
-            
+
     if hint_type == "number":
         num = card['number']
-        cards_of_number = [card for card in self.players_card[teammate] if card['number'] == number]
-        self.playersCards_sem.acquire()
-        for card in self.players_cards[teammate]:
+        cards_of_number = [card for card in players_cards[teammate] if card['number'] == num]
+        for card in players_cards[teammate]:
             if card in cards_of_number:
                 card["hint_number"] = True
-        self.playersCards_sem.release()  
-    """           
+  
 def user():
     answer = 3
     while answer != 1:
