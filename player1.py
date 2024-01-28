@@ -109,7 +109,7 @@ def give_hint(player):
                 card["hint_color"] = True
 
     if hint_type == "number":
-        num = card['number'] #hola
+        num = card['number'] 
         cards_of_number = [card for card in players_cards[teammate] if card['number'] == num]
         for card in players_cards[teammate]:
             if card in cards_of_number:
