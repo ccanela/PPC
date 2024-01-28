@@ -31,7 +31,7 @@ def player_process(playerId, socket_client, mq):
     print_board(playerId)
     players_cards = m.get_players_cards().copy()
     suites = m.get_suites().copy()
-    Window(playerId, players_cards, suites)   
+    #Window(playerId, players_cards, suites)   
     #Nina si tu enleves le commentaire ça marche? Moi ça n'affiche que pour un joueur, l'autre a la fenêtre vide
     print("hola1")
     running = True
@@ -178,8 +178,7 @@ def print_board(playerId):
                 if card["hint_number"] :
                     print("*", end="  ")
                 else :
-                    print(end="  ")    
-                             
+                    print(end="  ")             
    
 def end_game(signum, frame):
     print("2")
