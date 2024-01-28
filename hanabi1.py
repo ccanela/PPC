@@ -101,7 +101,7 @@ class HanabiGame:
         print("fonction play_card")
         players_hand = dict(m.get_players_cards().copy())
         print(players_hand)
-        card = players_hand[playerId][i_card]
+        card = players_hand[playerId].remove(i_card)
         print(card)
         card_color = card['color']
         card_number = card['number']

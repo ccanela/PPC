@@ -96,7 +96,6 @@ def give_hint(player):
     players = list(m.get_players_cards().copy().keys())
     players.remove(playerId)
     print("Which player do you want to give a hint to ? ")
-    print(players)
     for i, player in enumerate(players): 
         print(f"{i+1}. {player}")
     i_teammate = int(input(""))
