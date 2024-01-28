@@ -49,23 +49,23 @@ class HanabiGame:
         numbers = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
         num_cards_in_hand = 5
         
-        self.deck_mutex.acquire()
+        #self.deck_mutex.acquire()
         self.deck = [{'color': color, 'number': number, 'hint_color': False, 'hint_number': False} for color in self.colors for number in numbers]
         random.shuffle(self.deck)
-        self.deck_mutex.release()
+        #self.deck_mutex.release()
 
-        self.playersCards_mutex.acquire()
+        #self.playersCards_mutex.acquire()
         
         for player in range(num_players):
             hand = []
             for _ in range(num_cards_in_hand):
-                self.deck_mutex.acquire()
+                #self.deck_mutex.acquire()
                 card = self.deck.pop()
-                self.deck_mutex.release()
+                #self.deck_mutex.release()
                 hand.append(card)
             m.set_players_cards(f"player{player+1}", hand)
             print(m.get_players_cards().copy())
-        self.playersCards_mutex.release()
+        #self.playersCards_mutex.release()
         print("fin init_deck")
         self.send("initCards")
 
@@ -105,32 +105,34 @@ class HanabiGame:
         card = player_hand[i_card]
         card_color = card['color']
         card_number = card['number']
-        self.suites_mutex.acquire()
+        #self.suites_mutex.acquire()
         suites = m.get_suites().copy()
         if card_number == suites[card_color] + 1:
+            print(f"You played successfully a {card_color} {card_number}")
             m.set_suites(card_color, card_number) 
-            self.suites_mutex.release()
+            #self.suites_mutex.release()
             if card_number == 5: 
-                self.tokens_mutex.acquire()
-                info_tk = m.get_tokens()._getvalue()["info_tk"]
+                #self.tokens_mutex.acquire()
+                info_tk = m.get_tokens().copy()["info_tk"]
                 m.set_tokens("info_tk", info_tk+1) 
-                self.tokens_mutex.release()
+                #self.tokens_mutex.release()
 
         else:
-            self.tokens_mutex.acquire()
-            fuse_tk = m.get_tokens()._getvalue()["fuse_tk"]
+            #self.tokens_mutex.acquire()
+            fuse_tk = m.get_tokens().copy()["fuse_tk"]
+            print(fuse_tk)
             self.set_tokens("fuse_tk", fuse_tk - 1)
-            self.tokens_mutex.release()
+            #self.tokens_mutex.release()
 
         if len(self.deck) > 0:
-            self.deck_mutex.acquire()
-            self.playersCards_mutex.acquire()
+            #self.deck_mutex.acquire()
+            #self.playersCards_mutex.acquire()
             new_card = self.deck.pop()
-            hand_player = m.get_players_cards()._getvalue()[f"player{playerId}"]
+            hand_player = list(m.get_players_cards().copy()[f"player{playerId}"])
             hand_player.append(new_card)
             m.set_players_cards(f"player{playerId}", hand_player)
-            self.deck_mutex.release()
-            self.playersCards_mutex.release()
+            #self.deck_mutex.release()
+            #self.playersCards_mutex.release()
 
 
     def check_end(self):
