@@ -5,9 +5,7 @@ import signal
 import sys
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
-from hanabi1 import HanabiGame as hg
 from test_button2 import *
-from print_color import print
 
 class RemoteManager(BaseManager): pass
 RemoteManager.register('get_suites')
@@ -32,7 +30,6 @@ def player_process(playerId, socket_client, mq):
     players_cards = m.get_players_cards().copy()
     suites = m.get_suites().copy()
     #Window(playerId, players_cards, suites)   
-    #Nina si tu enleves le commentaire ça marche? Moi ça n'affiche que pour un joueur, l'autre a la fenêtre vide
     print("hola1")
     running = True
     while running:
@@ -44,21 +41,17 @@ def player_process(playerId, socket_client, mq):
         print(f"It's the turn of {current_player}")    
         if current_player == playerId:
             action = turn(playerId)
-            #Afficher des options de jeu
             mq.send(action, type=1)
             mq.send("end of the turn", type=3)
             send(socket_client, "end of the turn")
-            #Afficher fin du tour
                                     
         else:
             action, t = mq.receive(type=1)
             print(f"{current_player} choose to {action}")
-            #Afficher "{current_player} choose to {action}"
             mess, t = mq.receive(type=3)      
-        # Lógica del jugador aquí
-        # Manejar la comunicación con el juego a través del pipe y el socket
+    
         
-def turn(player):
+def turn(playerId):
         print("Which action do you want to do?\n")
         #mutex
         tokens = m.get_tokens().copy()
@@ -70,17 +63,17 @@ def turn(player):
             #test qu'il met pas de 1? 
 
         if action == 1:
-            give_hint(player)
+            give_hint(playerId)
         
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
             send("play card")
             #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
-            #hg.play_card(player)  #on ne peut pas lancer la fonction comme ça 
+
             pass 
         else:
             print("Invalid action. Please try again.")
-            turn(player)
+            turn(playerId)
           
 
 def give_hint(player):
@@ -116,7 +109,7 @@ def give_hint(player):
                 card["hint_color"] = True
 
     if hint_type == "number":
-        num = card['number']
+        num = card['number'] #hola
         cards_of_number = [card for card in players_cards[teammate] if card['number'] == num]
         for card in players_cards[teammate]:
             if card in cards_of_number:
