@@ -24,9 +24,9 @@ def player_process(playerId, socket_client, mq):
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
     
     data = receive(socket_client)
-    """ while data != "initCards":
-        data = receive(socket_client) """ #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
-    print("Afficher la fenêtre") 
+    while data != "initCards":
+        data = receive(socket_client) #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
+    print_board(playerId)
     players_cards = m.get_players_cards().copy()
     suites = m.get_suites().copy()
     #Window(playerId, players_cards, suites)   
@@ -109,7 +109,7 @@ def give_hint(player):
                 card["hint_color"] = True
 
     if hint_type == "number":
-        num = card['number'] 
+        num = card['number'] #hola
         cards_of_number = [card for card in players_cards[teammate] if card['number'] == num]
         for card in players_cards[teammate]:
             if card in cards_of_number:
@@ -137,9 +137,49 @@ def receive(socket_connexion, buffer_size=1024):
         return data_decoded
     except Exception as e:
         print(f"Error when receiving data : {e}")
-        return None       
-      
-        
+        return None     
+
+def print_board(playerId):
+    suites = m.get_suites().copy()
+    players_cards = m.get_players_cards().copy()
+    tokens = m.get_tokens().copy()
+    print("\nBoard :\n\n")
+    print(f"\nFuse Tokens : {tokens['fuse_tk']}")
+    print(f"\nInfo Tokens : {tokens['info_tk']}")
+    print("\nSuites :", end="  ")
+    for color, num in suites:
+        print(num, color=color, end="  ")
+    print("\n\n\nHands :\n")        
+    for player, cards in players_cards :
+        if player == playerId :
+            
+            print(f"Me :", end="  ")
+            for card in cards :
+                num = card["number"]
+                color = card["color"]
+                if card["hint_color"] and card["hint_number"]:
+                    print(num, color=color, end="  ")
+                elif card["hint_color"]:
+                    print("-", color=color, end="  ")
+                elif card["hint_number"] :
+                    print(num, end="  ")
+                else :
+                    print("-", end="  ") 
+            
+        else :
+            
+            print(f"{player} :", end="  ")
+            for card in cards :
+                num = card["number"]
+                color = card["color"]
+                if card["hint_color"] :
+                    print(num, color=color, end="")
+                else:
+                    print(num, end="")
+                if card["hint_number"] :
+                    print("*", end="  ")
+                else :
+                    print(end="  ")             
    
 def end_game(signum, frame):
     print("2")
