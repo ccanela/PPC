@@ -41,8 +41,8 @@ def player_process(playerId, socket_client, mq):
         print(f"It's the turn of {current_player}")    
         if current_player == playerId:
             action = turn(playerId)
-            mq.send(action, type=1)
-            mq.send("end of the turn", type=3)
+            mq.send(action.encode(), type=1)
+            mq.send(b"end of the turn", type=3)
             send(socket_client, "end of the turn")
                                     
         else:
@@ -68,12 +68,14 @@ def turn(playerId):
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
             send("play card")
+
             #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
 
             pass 
         else:
             print("Invalid action. Please try again.")
             turn(playerId)
+    
           
 
 def give_hint(player):
@@ -109,11 +111,15 @@ def give_hint(player):
                 card["hint_color"] = True
 
     if hint_type == "number":
-        num = card['number'] #hola
+        num = card['number'] 
         cards_of_number = [card for card in players_cards[teammate] if card['number'] == num]
         for card in players_cards[teammate]:
             if card in cards_of_number:
                 card["hint_number"] = True
+    message = f"{playerId} gave a {hint_type} hint to {teammate} about {card[hint_type]}"
+    for player in players:
+        mq.send(message.encode(), type=2)  
+    
   
 def user():
     answer = 3
