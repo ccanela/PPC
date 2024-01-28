@@ -101,7 +101,7 @@ class HanabiGame:
         print("fonction play_card")
         players_hand = dict(m.get_players_cards().copy())
         print(players_hand)
-        card = players_hand[playerId][i_card]
+        card = players_hand[playerId].remove(i_card)
         print(card)
         card_color = card['color']
         card_number = card['number']
@@ -121,7 +121,7 @@ class HanabiGame:
             #self.tokens_mutex.acquire()
             fuse_tk = m.get_tokens().copy()["fuse_tk"]
             print(fuse_tk)
-            self.set_tokens("fuse_tk", fuse_tk - 1)
+            m.set_tokens("fuse_tk", fuse_tk - 1)
             #self.tokens_mutex.release()
 
         if len(self.deck) > 0:
@@ -130,7 +130,7 @@ class HanabiGame:
             new_card = self.deck.pop()
             hand_player = list(m.get_players_cards().copy()[playerId])
             hand_player.append(new_card)
-            m.set_players_cards(f"player{playerId}", hand_player)
+            m.set_players_cards(playerId, hand_player)
             #self.deck_mutex.release()
             #self.playersCards_mutex.release()
 
