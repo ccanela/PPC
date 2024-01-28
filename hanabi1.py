@@ -108,29 +108,29 @@ class HanabiGame:
         self.suites_mutex.acquire()
         suites = m.get_suites().copy()
         if card_number == suites[card_color] + 1:
-            m.set_suites(card_color, card_number) #card_number doit être int
+            m.set_suites(card_color, card_number) 
             self.suites_mutex.release()
             if card_number == 5: 
-                self.tokens_sem.acquire()
+                self.tokens_mutex.acquire()
                 info_tk = m.get_tokens()._getvalue()["info_tk"]
                 m.set_tokens("info_tk", info_tk+1) 
-                self.tokens_sem.release()
+                self.tokens_mutex.release()
 
         else:
-            self.tokens_sem.acquire()
+            self.tokens_mutex.acquire()
             fuse_tk = m.get_tokens()._getvalue()["fuse_tk"]
             self.set_tokens("fuse_tk", fuse_tk - 1)
-            self.tokens_sem.release()
+            self.tokens_mutex.release()
 
         if len(self.deck) > 0:
-            self.deck_sem.acquire()
-            self.playersCards_sem.acquire()
+            self.deck_mutex.acquire()
+            self.playersCards_mutex.acquire()
             new_card = self.deck.pop()
             hand_player = m.get_players_cards()._getvalue()[f"player{playerId}"]
             hand_player.append(new_card)
             m.set_players_cards(f"player{playerId}", hand_player)
-            self.deck_sem.release()
-            self.playersCards_sem.release()
+            self.deck_mutex.release()
+            self.playersCards_mutex.release()
 
 
     def check_end(self):
