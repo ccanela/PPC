@@ -29,7 +29,7 @@ class HanabiGame:
     def __init__(self, num_players, players_info):
         print("init HanabiGame")
         self.num_players = num_players
-        self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
+        self.colors = ['red', 'blue', 'green', 'yellow', 'purple'][:num_players]
         #self.suites = m.get_suites() je crois que ça n'a pas de sens parce que c'est dans la memoire partagé pas dans la classe 
         self.discard = []
         #self.players_cards = m.get_players_cards()
@@ -67,6 +67,7 @@ class HanabiGame:
             print(m.get_players_cards().copy())
         self.playersCards_mutex.release()
         print("fin init_deck")
+        self.send("initCards")
 
     def send(self, mess, player="all"):
         if player == "all":
@@ -96,11 +97,12 @@ class HanabiGame:
                 print(f"Error when receiving data : {e}")
                 return None                 
     
-    def play_card(self, playerId, card):
+    def play_card(self, playerId):
         #code pour choisir une carte et l'enlever (pop) de players_cards[f"player{player}"](avec interface graphique)
 
-        card_color = card['color']
-        card_number = card['number']
+        
+        # card_color = card['color']
+        # card_number = card['number']
         self.suites_mutex.acquire()
         suites = m.get_suites().copy()
         if card_number == suites[card_color] + 1:

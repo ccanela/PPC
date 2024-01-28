@@ -7,6 +7,7 @@ import multiprocessing as mp
 from multiprocessing.managers import BaseManager
 from hanabi1 import HanabiGame as hg
 from test_button2 import *
+from print_color import print
 
 class RemoteManager(BaseManager): pass
 RemoteManager.register('get_suites')
@@ -25,12 +26,12 @@ def player_process(playerId, socket_client, mq):
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
     
     data = receive(socket_client)
-    """ while data != "initCards":
-        data = receive(socket_client) """ #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
-    print("Afficher la fenêtre") 
+    while data != "initCards":
+        data = receive(socket_client) #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
+    print_board(playerId)
     players_cards = m.get_players_cards().copy()
     suites = m.get_suites().copy()
-    #Window(playerId, players_cards, suites)   
+    Window(playerId, players_cards, suites)   
     #Nina si tu enleves le commentaire ça marche? Moi ça n'affiche que pour un joueur, l'autre a la fenêtre vide
     print("hola1")
     running = True
@@ -135,9 +136,50 @@ def receive(socket_connexion, buffer_size=1024):
         return data_decoded
     except Exception as e:
         print(f"Error when receiving data : {e}")
-        return None       
-      
-        
+        return None     
+
+def print_board(playerId):
+    suites = m.get_suites().copy()
+    players_cards = m.get_players_cards().copy()
+    tokens = m.get_tokens().copy()
+    print("\nBoard :\n\n")
+    print(f"\nFuse Tokens : {tokens['fuse_tk']}")
+    print(f"\nInfo Tokens : {tokens['info_tk']}")
+    print("\nSuites :", end="  ")
+    for color, num in suites:
+        print(num, color=color, end="  ")
+    print("\n\n\nHands :\n")        
+    for player, cards in players_cards :
+        if player == playerId :
+            
+            print(f"Me :", end="  ")
+            for card in cards :
+                num = card["number"]
+                color = card["color"]
+                if card["hint_color"] and card["hint_number"]:
+                    print(num, color=color, end="  ")
+                elif card["hint_color"]:
+                    print("-", color=color, end="  ")
+                elif card["hint_number"] :
+                    print(num, end="  ")
+                else :
+                    print("-", end="  ") 
+            
+        else :
+            
+            print(f"{player} :", end="  ")
+            for card in cards :
+                num = card["number"]
+                color = card["color"]
+                if card["hint_color"] :
+                    print(num, color=color, end="")
+                else:
+                    print(num, end="")
+                if card["hint_number"] :
+                    print("*", end="  ")
+                else :
+                    print(end="  ")    
+                             
    
 def end_game(signum, frame):
     print("2")
