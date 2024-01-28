@@ -40,7 +40,7 @@ def player_process(playerId, socket_client, mq):
             current_player= receive(socket_client)
         print(f"It's the turn of {current_player}\n")    
         if current_player == playerId:
-            action, mess = turn(playerId)
+            action, mess = turn(playerId, socket_client)
             mq.send(action.encode(), type=1)
             if mess :
                 mq.send(mess.encode(), type=2)
@@ -59,7 +59,7 @@ def player_process(playerId, socket_client, mq):
                  
     
         
-def turn(playerId):
+def turn(playerId, socket):
         print("Which action do you want to do?\n")
         #mutex
         tokens = m.get_tokens().copy()
@@ -76,7 +76,7 @@ def turn(playerId):
         
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
-            send(f"play card {str(i_card -1)}")
+            send(socket, f"play card {str(i_card -1)}")
             #recevoir un message de confirmation depuis le jeu
             return("play card", None)
             #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
