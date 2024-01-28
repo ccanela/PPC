@@ -194,7 +194,7 @@ def print_board(playerId):
                 if card["hint_color"] :
                     print("c", end="  ")
                 if card["hint_number"] :
-                    print("n", end="  ")
+                    print("n", end="")
                 print(end="  ")             
    
 def end_game(signum, frame):

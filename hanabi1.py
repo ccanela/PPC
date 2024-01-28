@@ -97,12 +97,12 @@ class HanabiGame:
                 print(f"Error when receiving data : {e}")
                 return None                 
     
-    def play_card(self, playerId):
+    def play_card(self, playerId, i_card):
         print("fonction play_card")
-        message = self.receive(playerId)
-        i_card = int(message[-1])
-        player_hand = list(m.get_players_cards().copy().values())
-        card = player_hand[i_card]
+        players_hand = dict(m.get_players_cards().copy())
+        print(players_hand)
+        card = players_hand[playerId][i_card]
+        print(card)
         card_color = card['color']
         card_number = card['number']
         #self.suites_mutex.acquire()
@@ -128,7 +128,7 @@ class HanabiGame:
             #self.deck_mutex.acquire()
             #self.playersCards_mutex.acquire()
             new_card = self.deck.pop()
-            hand_player = list(m.get_players_cards().copy()[f"player{playerId}"])
+            hand_player = list(m.get_players_cards().copy()[playerId])
             hand_player.append(new_card)
             m.set_players_cards(f"player{playerId}", hand_player)
             #self.deck_mutex.release()
@@ -169,8 +169,9 @@ class HanabiGame:
         end = False
         while not end:
             data = self.receive(playerId)
-            if data == "play card":
-                self.play_card(playerId)
+            if "play card" in data:
+                i_card = int(data[-1])
+                self.play_card(playerId, i_card)
             else:
                 end = True
         print("fin du tour")        
