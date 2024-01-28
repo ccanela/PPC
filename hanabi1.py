@@ -99,15 +99,16 @@ class HanabiGame:
                 return None                 
     
     def play_card(self, playerId):
-        #code pour choisir une carte et l'enlever (pop) de players_cards[f"player{player}"](avec interface graphique)
-
-        
-        # card_color = card['color']
-        # card_number = card['number']
+        message = self.receive(playerId)
+        i_card = int(message[-1])
+        player_hand = list(m.get_players_cards().copy().values())
+        card = player_hand[i_card]
+        card_color = card['color']
+        card_number = card['number']
         self.suites_mutex.acquire()
         suites = m.get_suites().copy()
         if card_number == suites[card_color] + 1:
-            m.set_suites(card_color,card_number) #card_number doit être int
+            m.set_suites(card_color, card_number) #card_number doit être int
             self.suites_mutex.release()
             if card_number == 5: 
                 self.tokens_sem.acquire()

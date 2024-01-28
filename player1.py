@@ -68,7 +68,7 @@ def turn(playerId):
         
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
-            send(f"play card {str(i_card)}")
+            send(f"play card {str(i_card -1)}")
             #recevoir un message de confirmation depuis le jeu
             return("play card")
             #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
@@ -117,7 +117,7 @@ def give_hint(player):
             if card in cards_of_number:
                 card["hint_number"] = True
     message = f"{playerId} gave a {hint_type} hint to {teammate} about {card[hint_type]}"
-    for player in players:
+    for _ in players:
         mq.send(message.encode(), type=2)  
     
   
