@@ -84,36 +84,44 @@ def turn(player):
           
 
 def give_hint(player):
-    
-    #hg.tokens_sem.acquire() 
     info_tk = m.get_tokens()._getvalue()["info_tk"]
     print(f"{info_tk-1} info tokens left")
-    #Nina j'ai un segmentation fault juste après ça 
-    m.set_tokens("info_tk", info_tk -1)      
-    #hg.tokens_sem.release()
-    
-    #Arreter d'afficher les boutons d'option
-    #Afficher indication pour choisir carte puis piece number or color
-    """ 
+    m.set_tokens("info_tk", info_tk-1)
+
+    # Ask the player who they want to give a hint to
+    players = list(m.get_players_cards().copy().keys())
+    players.remove(playerId)
+    print("Which player do you want to give a hint to?")
+    i_teammate = int(input("".join(f"{i+1}. {player}\n" for i, player in enumerate(players))))
+    teammate = players[i_teammate-1]
+    # Get the teammate's cards
+    players_cards = m.get_players_cards().copy()
+
+    # Show the teammate's cards
+    print("Your teammate's cards are: ")
+    print(players_cards[teammate])
+
+    # Ask the player if they want to give a number or color hint
+    hint_type = input("Do you want to give a number or color hint?")
+
+    # Ask the player the index of the card they want to give a hint about
+    card_index = int(input("Enter the index of the card you want to give a hint about (from 1 to 5)"))
+    card = players_cards[teammate][card_index - 1]
+
     if hint_type == "color":
         color = card['color']
-        cards_of_color = [card for card in self.players_cards[teammate] if card['color'] == color]
-        self.playersCards_sem.acquire()
-        for card in self.players_cards[teammate]:
+        cards_of_color = [card for card in players_cards[teammate] if card['color'] == color]
+        for card in players_cards[teammate]:
             if card in cards_of_color:
                 card["hint_color"] = True
-        self.playersCards_sem.release()        
-                    
-            
+
     if hint_type == "number":
         num = card['number']
-        cards_of_number = [card for card in self.players_card[teammate] if card['number'] == number]
-        self.playersCards_sem.acquire()
-        for card in self.players_cards[teammate]:
+        cards_of_number = [card for card in players_cards[teammate] if card['number'] == num]
+        for card in players_cards[teammate]:
             if card in cards_of_number:
                 card["hint_number"] = True
-        self.playersCards_sem.release()  
-    """           
+  
 def user():
     answer = 3
     while answer != 1:
