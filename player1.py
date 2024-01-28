@@ -112,21 +112,23 @@ def give_hint(player):
 
     # Ask the player the index of the card they want to give a hint about
     card_index = int(input("Enter the index of the card you want to give a hint about (from 1 to 5) "))
-    card = players_cards[teammate][card_index - 1]
+    card = cards[card_index - 1]
 
     if hint_type == "color":
         color = card['color']
-        cards_of_color = [card for card in players_cards[teammate] if card['color'] == color]
-        for card in players_cards[teammate]:
+        cards_of_color = [card for card in cards if card['color'] == color]
+        for card in cards:
             if card in cards_of_color:
                 card["hint_color"] = True
+                m.set_players_cards(teammate, cards)
 
     if hint_type == "number":
         num = card['number'] 
-        cards_of_number = [card for card in players_cards[teammate] if card['number'] == num]
-        for card in players_cards[teammate]:
+        cards_of_number = [card for card in cards if card['number'] == num]
+        for card in cards:
             if card in cards_of_number:
                 card["hint_number"] = True
+                m.set_players_cards(teammate, cards)
     message = f"{playerId} gave a {hint_type} hint to {teammate} about {card[hint_type]}"
     return message
     
