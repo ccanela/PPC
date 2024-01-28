@@ -1,9 +1,15 @@
 from multiprocessing.managers import BaseManager
 
-num_players = int(input("How many players? "))
+while True:
+    num_players = int(input("How many players? "))
+    if 2 <= num_players <= 5:
+        break
+    else:
+        print("Invalid option. Please enter a number between 2 and 5.")
+
 
 #Utilisation des remote managers pour la shared memory
-colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
+colors = ['red', 'blue', 'green', 'yellow', 'purple'][:num_players]
 tokens = {"info_tk" : 3 + num_players, "fuse_tk" : 3}
 suites = {color: 0 for color in colors}
 players_cards = {f"player{i+1}": [] for i in range(num_players)}

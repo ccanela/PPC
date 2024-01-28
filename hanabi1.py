@@ -99,9 +99,8 @@ class HanabiGame:
     
     def play_card(self, playerId, i_card):
         print("fonction play_card")
-        players_hand = dict(m.get_players_cards().copy())
-        print(players_hand)
-        card = players_hand[playerId].pop(i_card)
+        players_cards = dict(m.get_players_cards().copy())
+        card = players_cards[playerId].pop(i_card)
         print(card)
         card_color = card['color']
         card_number = card['number']
@@ -128,9 +127,8 @@ class HanabiGame:
             #self.deck_mutex.acquire()
             #self.playersCards_mutex.acquire()
             new_card = self.deck.pop()
-            hand_player = list(m.get_players_cards().copy()[playerId])
-            hand_player.append(new_card)
-            m.set_players_cards(playerId, hand_player)
+            players_cards[playerId].append(new_card)
+            m.set_players_cards(playerId, players_cards[playerId])
             #self.deck_mutex.release()
             #self.playersCards_mutex.release()
         self.send("done", player=playerId)
@@ -151,7 +149,7 @@ class HanabiGame:
                     print(f"Error: Process with PID: {pid} NOT FOUND")
                 except PermissionError:
                     print(f"Error: No permission to send a signal to the process {pid}")
-            os._exit(0)         
+            sys.exit(0)        
 
         elif all(card == 5 for card in suites.values()):
             print("2")

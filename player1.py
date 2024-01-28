@@ -95,10 +95,15 @@ def give_hint(player):
     # Ask the player who they want to give a hint to
     players = list(m.get_players_cards().copy().keys())
     players.remove(playerId)
-    print("Which player do you want to give a hint to ? ")
-    for i, player in enumerate(players): 
-        print(f"{i+1}. {player}")
-    i_teammate = int(input(""))
+    while True:
+        print("Which player do you want to give a hint to ? ")
+        for i, player in enumerate(players): 
+            print(f"{i+1}. {player}")
+        i_teammate = int(input(""))
+        if 1 <= i_teammate <= len(players)-1:
+            break
+        else:
+            print("Invalid option. Please enter a number between 1 and ", len(players))
     teammate = players[i_teammate-1]
     # Get the teammate's cards
     players_cards = m.get_players_cards().copy()
@@ -110,10 +115,20 @@ def give_hint(player):
         printc(card["number"], color=card["color"], end=" ")    
 
     # Ask the player if they want to give a number or color hint
-    hint_type = input("\nDo you want to give a number or color hint? ")
+    while True:
+        hint_type = input("\nDo you want to give a number or color hint? ")
+        if hint_type in ["number", "color"]:
+            break
+        else:
+            print("Invalid option. Please enter 'number' or 'color'.")
 
     # Ask the player the index of the card they want to give a hint about
-    card_index = int(input("Enter the index of the card you want to give a hint about (from 1 to 5) "))
+    while True:
+        card_index = int(input("Enter the index of the card you want to give a hint about (from 1 to 5) "))
+        if 1 <= card_index <= 5:
+            break
+        else:
+            print("Invalid option. Please enter a number between 1 and 5.")
     card = cards[card_index - 1]
 
     if hint_type == "color":
@@ -208,7 +223,10 @@ def end_game(signum, frame):
         print(f"Signal received: {signum}. Game status:  Loss")
         #affichage ou timer 
     #vider toutes les ressources avant de faire "exit"
-    os._exit(0)
+    #mq.close()
+    #socket_client.close()
+    #normalement sys.exit(0) s'occupe de vider toutes les ressources 
+    sys.exit(0)
         
 
 if __name__ == "__main__" :
