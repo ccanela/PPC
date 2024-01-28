@@ -6,6 +6,7 @@ import sys
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
 from test_button2 import *
+from print_color import print as printc
 
 class RemoteManager(BaseManager): pass
 RemoteManager.register('get_suites')
@@ -27,18 +28,17 @@ def player_process(playerId, socket_client, mq):
     while data != "initCards":
         data = receive(socket_client) #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
     print_board(playerId)
-    players_cards = m.get_players_cards().copy()
-    suites = m.get_suites().copy()
+    # players_cards = m.get_players_cards().copy()
+    # suites = m.get_suites().copy()
     #Window(playerId, players_cards, suites)   
     print("hola1")
     running = True
     while running:
         current_player = receive(socket_client)
-        print("hola2")
+        print(current_player)
         while "player" not in current_player:
             current_player= receive(socket_client)
-            print("playerID received")
-        print(f"It's the turn of {current_player}")    
+        print(f"It's the turn of {current_player}\n")    
         if current_player == playerId:
             action = turn(playerId)
             mq.send(action, type=1)
@@ -64,16 +64,18 @@ def turn(playerId):
 
         if action == 1:
             give_hint(playerId)
+            return("give hint")
         
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
-            send("play card")
+            send(f"play card {str(i_card)}")
+            #recevoir un message de confirmation depuis le jeu
+            return("play card")
             #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
 
-            pass 
         else:
             print("Invalid action. Please try again.")
-            turn(playerId)
+            return(turn(playerId))
           
 
 def give_hint(player):
@@ -133,7 +135,7 @@ def send(socket_connexion, data):
 def receive(socket_connexion, buffer_size=1024):
     try:
         data_received = socket_connexion.recv(buffer_size)        
-        data_decoded = data_received.decode()        
+        data_decoded = data_received.decode() 
         return data_decoded
     except Exception as e:
         print(f"Error when receiving data : {e}")
@@ -143,24 +145,24 @@ def print_board(playerId):
     suites = m.get_suites().copy()
     players_cards = m.get_players_cards().copy()
     tokens = m.get_tokens().copy()
-    print("\nBoard :\n\n")
+    print("\nBoard :\n")
     print(f"\nFuse Tokens : {tokens['fuse_tk']}")
-    print(f"\nInfo Tokens : {tokens['info_tk']}")
+    print(f"Info Tokens : {tokens['info_tk']}")
     print("\n\nSuites :", end="  ")
-    for color, num in suites:
-        print(num, color=color, end="  ")
-    print("\n\n\nHands :\n")        
-    for player, cards in players_cards :
+    for color, num in suites.items():
+        printc(num, color=color, end="  ")
+    print("\n\n\nHands :")        
+    for player, cards in players_cards.items():
         if player == playerId :
             
-            print(f"Me :", end="  ")
+            print(f"\nMe ({playerId}) :", end="  ")
             for card in cards :
                 num = card["number"]
                 color = card["color"]
                 if card["hint_color"] and card["hint_number"]:
-                    print(num, color=color, end="  ")
+                    printc(num, color=color, end="  ")
                 elif card["hint_color"]:
-                    print("-", color=color, end="  ")
+                    printc("-", color=color, end="  ")
                 elif card["hint_number"] :
                     print(num, end="  ")
                 else :
@@ -168,7 +170,7 @@ def print_board(playerId):
             
         else :
             
-            print(f"{player} :", end="  ")
+            print(f"\n{player} :", end="  ")
             for card in cards :
                 num = card["number"]
                 color = card["color"]

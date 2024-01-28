@@ -74,7 +74,8 @@ class HanabiGame:
             for player in self.players_info.values():
                 conn = player["socket"][0]
                 try:
-                    data_encoded = mess.encode()      
+                    data_encoded = mess.encode()   
+                    print(mess, data_encoded)   
                     conn.sendall(data_encoded)    
                 except Exception as e:
                     print(f"Error when sending data : {e}")
@@ -163,7 +164,7 @@ class HanabiGame:
         print("hola player_turn")
         end = False
         while not end:
-            data = self.send(playerId)
+            data = self.receive(playerId)
             print("playerID sent")
             while (data != "end of the turn") or (data != "play card"):
                 data = self.receive(playerId)
