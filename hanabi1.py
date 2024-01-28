@@ -138,6 +138,7 @@ class HanabiGame:
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
         fuse_tk = m.get_tokens().copy()["fuse_tk"]
+        suites = m.get_suites().copy()
         if fuse_tk == 0:
             for info in self.players_info.values():
                 pid = info["pid"]
@@ -149,7 +150,7 @@ class HanabiGame:
                 except PermissionError:
                     print(f"Error: No permission to send a signal to the process {pid}")
 
-        elif all(card == 0 for card in self.suites.values()):
+        elif all(card == 0 for card in suites.values()):
             print("2")
             pid_players = self.get_pids("player.py")
             for pid in pid_players:
