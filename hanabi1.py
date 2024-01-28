@@ -75,7 +75,6 @@ class HanabiGame:
                 conn = player["socket"][0]
                 try:
                     data_encoded = mess.encode()   
-                    print(mess, data_encoded)   
                     conn.sendall(data_encoded)    
                 except Exception as e:
                     print(f"Error when sending data : {e}")
@@ -135,7 +134,8 @@ class HanabiGame:
 
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
-        if self.storm_tk == 0:
+        fuse_tk = m.get_tokens().copy()["fuse_tk"]
+        if fuse_tk == 0:
             for info in self.players_info.values():
                 pid = info["pid"]
                 try:
@@ -166,18 +166,15 @@ class HanabiGame:
         end = False
         while not end:
             data = self.receive(playerId)
-            print("playerID sent")
-            while (data != "end of the turn") or (data != "play card"):
-                data = self.receive(playerId)
             if data == "play card":
                 self.play_card(playerId)
             else:
                 end = True
+        print("fin du tour")        
 
     def start_game(self):
         print("hola start_game")
         players = list(self.players_info.keys())
-        print(players)
         i_player = 0
         running = True
         while running:
@@ -186,7 +183,7 @@ class HanabiGame:
             self.send(current_player)
             print("appel fonction player_turn")
             self.player_turn(current_player)
-            self.check_end()            
+            # self.check_end()            
             i_player = (i_player + 1) % len(players)
             print(i_player)
 
