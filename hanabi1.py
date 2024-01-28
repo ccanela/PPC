@@ -139,6 +139,7 @@ class HanabiGame:
         # Check if the third Storm token is turned lightning-side-up
         fuse_tk = m.get_tokens().copy()["fuse_tk"]
         suites = m.get_suites().copy()
+        print("coucou1")
         print(fuse_tk)
         if fuse_tk == 0:
             for info in self.players_info.values():
@@ -150,6 +151,7 @@ class HanabiGame:
                     print(f"Error: Process with PID: {pid} NOT FOUND")
                 except PermissionError:
                     print(f"Error: No permission to send a signal to the process {pid}")
+            os._exit(0)         
 
         elif all(card == 5 for card in suites.values()):
             print("2")
@@ -163,7 +165,7 @@ class HanabiGame:
                 except PermissionError:
                     print(f"Error: No permission to send a signal to the process {pid}")
         
-        os._exit(0)          
+            os._exit(0)          
 
        
     def player_turn(self, playerId):
@@ -191,6 +193,9 @@ class HanabiGame:
             self.player_turn(current_player)
             self.check_end()            
             i_player = (i_player + 1) % len(players)
+            print("coucou")
+            print(players)
+            print(len(players))
             print(i_player)
 
  
