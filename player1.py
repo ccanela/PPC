@@ -95,21 +95,23 @@ def give_hint(player):
     # Ask the player who they want to give a hint to
     players = list(m.get_players_cards().copy().keys())
     players.remove(playerId)
-    print("Which player do you want to give a hint to?")
+    print("Which player do you want to give a hint to ? ")
     i_teammate = int(input("".join(f"{i+1}. {player}\n" for i, player in enumerate(players))))
     teammate = players[i_teammate-1]
     # Get the teammate's cards
     players_cards = m.get_players_cards().copy()
 
     # Show the teammate's cards
-    print("Your teammate's cards are: ")
-    print(players_cards[teammate])
+    print("Your teammate's cards are : ")
+    cards = players_cards[teammate]
+    for card in cards :
+        printc(card["number"], color=card["color"], end=" ")    
 
     # Ask the player if they want to give a number or color hint
-    hint_type = input("Do you want to give a number or color hint?")
+    hint_type = input("\nDo you want to give a number or color hint? ")
 
     # Ask the player the index of the card they want to give a hint about
-    card_index = int(input("Enter the index of the card you want to give a hint about (from 1 to 5)"))
+    card_index = int(input("Enter the index of the card you want to give a hint about (from 1 to 5) "))
     card = players_cards[teammate][card_index - 1]
 
     if hint_type == "color":
@@ -157,7 +159,7 @@ def print_board(playerId):
     suites = m.get_suites().copy()
     players_cards = m.get_players_cards().copy()
     tokens = m.get_tokens().copy()
-    print("\nBoard :\n")
+    printc("\nBoard :\n", format='bold')
     print(f"\nFuse Tokens : {tokens['fuse_tk']}")
     print(f"Info Tokens : {tokens['info_tk']}")
     print("\n\nSuites :", end="  ")
