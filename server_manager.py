@@ -4,7 +4,7 @@ num_players = int(input("How many players? "))
 
 #Utilisation des remote managers pour la shared memory
 colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
-tokens = {"info_tk" : 3, "fuse_tk" : 3}
+tokens = {"info_tk" : 3 + num_players, "fuse_tk" : 3}
 suites = {color: 0 for color in colors}
 players_cards = {f"player{i+1}": [] for i in range(num_players)}
 

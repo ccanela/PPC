@@ -41,6 +41,7 @@ class HanabiGame:
         self.players_info = players_info
         self.send("start")                      
         self.init_deck(num_players)
+        print("appel fonction start_game")
         self.start_game()
                        
         
@@ -65,6 +66,7 @@ class HanabiGame:
             m.set_players_cards(f"player{player+1}", hand)
             print(m.get_players_cards().copy())
         self.playersCards_mutex.release()
+        print("fin init_deck")
 
     def send(self, mess, player="all"):
         if player == "all":
@@ -130,7 +132,7 @@ class HanabiGame:
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
         if self.storm_tk == 0:
-            for info in players_info.values():
+            for info in self.players_info.values():
                 pid = info["pid"]
                 try:
                     os.kill(pid, signal.SIGUSR2)
@@ -156,9 +158,11 @@ class HanabiGame:
 
        
     def player_turn(self, playerId):
+        print("hola player_turn")
         end = False
         while not end:
-            data = self.receive(playerId)
+            data = self.send(playerId)
+            print("playerID sent")
             while (data != "end of the turn") or (data != "play card"):
                 data = self.receive(playerId)
             if data == "play card":
@@ -167,16 +171,20 @@ class HanabiGame:
                 end = True
 
     def start_game(self):
-        print("hola1")
+        print("hola start_game")
         players = list(self.players_info.keys())
+        print(players)
         i_player = 0
         running = True
         while running:
             current_player = players[i_player]
+            print(current_player)
             self.send(current_player)
+            print("appel fonction player_turn")
             self.player_turn(current_player)
             self.check_end()            
             i_player = (i_player + 1) % len(players)
+            print(i_player)
 
  
 if __name__ == "__main__":
@@ -219,6 +227,7 @@ if __name__ == "__main__":
             playerId = f"player{players_connected}" 
             conn.sendall(playerId.encode())      
             players_info[playerId] = {"socket": (conn, addr), "pid": int(pid)}
+            print(players_info)
             
         print("Starting game")       
         

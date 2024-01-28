@@ -25,15 +25,13 @@ def player_process(playerId, socket_client, mq):
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
     
     data = receive(socket_client)
-    while data != "initCards":
-        data = receive(socket_client)
+    """ while data != "initCards":
+        data = receive(socket_client) """ #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
     print("Afficher la fenêtre") 
-    players_cards = m.get_players_cards()
-    players_cards._getvalue()
-    suites = m.get_suites()
-    suites._getvalue()
+    players_cards = m.get_players_cards().copy()
+    suites = m.get_suites().copy()
     #Window(playerId, players_cards, suites)   
-    #Affichage de la fenêtre avec le jeu de départ
+    #Nina si tu enleves le commentaire ça marche? Moi ça n'affiche que pour un joueur, l'autre a la fenêtre vide
     print("hola1")
     running = True
     while running:
@@ -41,6 +39,7 @@ def player_process(playerId, socket_client, mq):
         print("hola2")
         while "player" not in current_player:
             current_player= receive(socket_client)
+            print("playerID received")
         print(f"It's the turn of {current_player}")    
         if current_player == playerId:
             action = turn(playerId)
@@ -60,8 +59,9 @@ def player_process(playerId, socket_client, mq):
         
 def turn(player):
         print("Which action do you want to do?\n")
-        info_tk = m.get_tokens()
-        info_tk._getvalue()['info_tk']
+        #mutex
+        tokens = m.get_tokens().copy()
+        info_tk = tokens["info_tk"]
         if info_tk > 0 :
             action = int(input("1. Give a hint\n2. Play a card\n"))
         else :
@@ -73,7 +73,8 @@ def turn(player):
         
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
-            #faut chercher une façon de dire au jeu qu'on veut jouer cette carte 
+            send("play card")
+            #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
             #hg.play_card(player)  #on ne peut pas lancer la fonction comme ça 
             pass 
         else:
@@ -85,7 +86,8 @@ def give_hint(player):
     
     #hg.tokens_sem.acquire() 
     info_tk = m.get_tokens()._getvalue()["info_tk"]
-    print(info_tk)
+    print(f"{info_tk-1} info tokens left")
+    #Nina j'ai un segmentation fault juste après ça 
     m.set_tokens("info_tk", info_tk -1)      
     #hg.tokens_sem.release()
     

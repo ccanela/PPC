@@ -69,15 +69,16 @@ def info_card(value):
     print(value)
 
 class Window:
-    def __init__(self, num_player, players_cards, suites):
+    def __init__(self, playerId, players_cards, suites):
         pygame.init()
         pygame.font.init()
+        self.num_player = int(playerId[-1])
         # Configuración de la pantalla
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen_width, self.screen_height = pygame.display.get_surface().get_size()
         self.screen.fill((200, 255, 255))
         self.play_buttons = False
-        hand = players_cards.pop(f"player{num_player}")
+        hand = players_cards.pop(f"player{self.num_player}")
         card_positions = {
             1: (50, 50),
             2: (self.screen_width*0.6, 50),
@@ -101,7 +102,7 @@ class Window:
             for i, card in enumerate(hand):
                 card_image = 'back_card.png'
                 position = (card_positions.get(5, (0, 0))[0] + i * self.screen_width/15, card_positions.get(5, (0, 0))[1])
-                button = Button(card_image, position, """ action=play_card """, scale=0.1, value=(f"player{num_player}", card["number"], card["color"]))
+                button = Button(card_image, position, """ action=play_card """, scale=0.1, value=(f"player{self.num_player}", card["number"], card["color"]))
                 self.buttons.append(button)
             for i, (color, num) in enumerate(suites.items()): 
                 card_image = f"{num}_{color}.png"
