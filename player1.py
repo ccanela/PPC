@@ -77,7 +77,7 @@ def turn(playerId, socket):
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
             send(socket, f"play card {str(i_card -1)}")
-            #receive(socket, )
+            done = receive(socket)
             #recevoir un message de confirmation depuis le jeu
             return("play card", None)
             #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)

@@ -101,7 +101,7 @@ class HanabiGame:
         print("fonction play_card")
         players_hand = dict(m.get_players_cards().copy())
         print(players_hand)
-        card = players_hand[playerId].remove(i_card)
+        card = players_hand[playerId].pop(i_card)
         print(card)
         card_color = card['color']
         card_number = card['number']
@@ -133,7 +133,7 @@ class HanabiGame:
             m.set_players_cards(playerId, hand_player)
             #self.deck_mutex.release()
             #self.playersCards_mutex.release()
-
+        self.send("done", player=playerId)
 
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
