@@ -1,6 +1,6 @@
 from multiprocessing.managers import BaseManager
 
-num_players = int(input("How many players?"))
+num_players = int(input("How many players? "))
 
 #Utilisation des remote managers pour la shared memory
 colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]

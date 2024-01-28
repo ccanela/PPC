@@ -32,11 +32,13 @@ def player_process(playerId, socket_client, mq):
     players_cards._getvalue()
     suites = m.get_suites()
     suites._getvalue()
-    Window(playerId, players_cards, suites)   
+    #Window(playerId, players_cards, suites)   
     #Affichage de la fenêtre avec le jeu de départ
+    print("hola1")
     running = True
     while running:
         current_player = receive(socket_client)
+        print("hola2")
         while "player" not in current_player:
             current_player= receive(socket_client)
         print(f"It's the turn of {current_player}")    
@@ -57,19 +59,22 @@ def player_process(playerId, socket_client, mq):
         # Manejar la comunicación con el juego a través del pipe y el socket
         
 def turn(player):
-        print("Which action do you want to do?")
-        info_tk = m.get_tokens
+        print("Which action do you want to do?\n")
+        info_tk = m.get_tokens()
         info_tk._getvalue()['info_tk']
         if info_tk > 0 :
-            action = int(input("1. Give a hint\n2. Play a card"))
+            action = int(input("1. Give a hint\n2. Play a card\n"))
         else :
-            action = int(input("You don't have any info tokens left, you can only play a card. Type 2 to continue"))   
-        
+            action = int(input("You don't have any info tokens left, you can only play a card. Type 2 to continue\n"))   
+            #test qu'il met pas de 1? 
+
         if action == 1:
             give_hint(player)
         
         elif action == 2:
-            #hg.play_card(player)
+            i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
+            #faut chercher une façon de dire au jeu qu'on veut jouer cette carte 
+            #hg.play_card(player)  #on ne peut pas lancer la fonction comme ça 
             pass 
         else:
             print("Invalid action. Please try again.")
@@ -77,11 +82,12 @@ def turn(player):
           
 
 def give_hint(player):
-    #avant d'appeler la fonction il faut voir s'il y a de info_tk disponibles c-a-d info_tk >  
     
-    hg.tokens_sem.acquire()
-    info_tk -= 1 
-    hg.tokens_sem.release()
+    #hg.tokens_sem.acquire() 
+    info_tk = m.get_tokens()._getvalue()["info_tk"]
+    print(info_tk)
+    m.set_tokens("info_tk", info_tk -1)      
+    #hg.tokens_sem.release()
     
     #Arreter d'afficher les boutons d'option
     #Afficher indication pour choisir carte puis piece number or color
@@ -155,7 +161,7 @@ if __name__ == "__main__" :
         print("Connected")
         send(socket_client, str(pid))
         playerId = receive(socket_client)
-        print(f"Tu es le {playerId}")
+        print(f"You are the {playerId}")
     
         data = receive(socket_client)
         while data != "start":

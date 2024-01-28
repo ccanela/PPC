@@ -27,7 +27,7 @@ m.connect()
 
 class HanabiGame:
     def __init__(self, num_players, players_info):
-        
+        print("init HanabiGame")
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'white'][:num_players]
         #self.suites = m.get_suites() je crois que ça n'a pas de sens parce que c'est dans la memoire partagé pas dans la classe 
@@ -39,8 +39,7 @@ class HanabiGame:
         self.playersCards_mutex = th.Lock()
         self.tokens_mutex = th.Lock()
         self.players_info = players_info
-        
-        self.send("start")                        
+        self.send("start")                      
         self.init_deck(num_players)
         self.start_game()
                        
@@ -64,7 +63,8 @@ class HanabiGame:
                 self.deck_mutex.release()
                 hand.append(card)
             m.set_players_cards(f"player{player+1}", hand)
-            self.playersCards_mutex.release()
+            print(m.get_players_cards().copy())
+        self.playersCards_mutex.release()
 
     def send(self, mess, player="all"):
         if player == "all":
@@ -94,31 +94,35 @@ class HanabiGame:
                 print(f"Error when receiving data : {e}")
                 return None                 
     
-    def play_card(self, player):
+    def play_card(self, playerId, card):
         #code pour choisir une carte et l'enlever (pop) de players_cards[f"player{player}"](avec interface graphique)
 
         card_color = card['color']
         card_number = card['number']
-
-        if card_number == self.suites[card_color] + 1:
-            self.suites_mutex.acquire()
-            m.set_suites(card_color,card_number)
+        self.suites_mutex.acquire()
+        suites = m.get_suites().copy()
+        if card_number == suites[card_color] + 1:
+            m.set_suites(card_color,card_number) #card_number doit être int
             self.suites_mutex.release()
             if card_number == 5: 
                 self.tokens_sem.acquire()
-                info_tk += 1 
+                info_tk = m.get_tokens()._getvalue()["info_tk"]
+                m.set_tokens("info_tk", info_tk+1) 
                 self.tokens_sem.release()
 
         else:
             self.tokens_sem.acquire()
-            self.storm_tk -= 1
+            fuse_tk = m.get_tokens()._getvalue()["fuse_tk"]
+            self.set_tokens("fuse_tk", fuse_tk - 1)
             self.tokens_sem.release()
 
         if len(self.deck) > 0:
             self.deck_sem.acquire()
             self.playersCards_sem.acquire()
             new_card = self.deck.pop()
-            self.players_cards[f"player{player}"].append(new_card)
+            hand_player = m.get_players_cards()._getvalue()[f"player{playerId}"]
+            hand_player.append(new_card)
+            m.set_players_cards(f"player{playerId}", hand_player)
             self.deck_sem.release()
             self.playersCards_sem.release()
 
@@ -163,8 +167,8 @@ class HanabiGame:
                 end = True
 
     def start_game(self):
-        players = list(self.players_info.keys())
         print("hola1")
+        players = list(self.players_info.keys())
         i_player = 0
         running = True
         while running:
@@ -178,7 +182,6 @@ class HanabiGame:
 if __name__ == "__main__":
 
     players_cards = m.get_players_cards()
-
     num_players = len(players_cards.keys())
     
     # if len(sys.argv) < 2:
