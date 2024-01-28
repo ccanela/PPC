@@ -153,7 +153,7 @@ def print_board(playerId):
     print("\nBoard :\n\n")
     print(f"\nFuse Tokens : {tokens['fuse_tk']}")
     print(f"\nInfo Tokens : {tokens['info_tk']}")
-    print("\nSuites :", end="  ")
+    print("\n\nSuites :", end="  ")
     for color, num in suites:
         print(num, color=color, end="  ")
     print("\n\n\nHands :\n")        
