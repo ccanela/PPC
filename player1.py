@@ -27,28 +27,36 @@ def player_process(playerId, socket_client, mq):
     data = receive(socket_client)
     while data != "initCards":
         data = receive(socket_client) #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
-    print_board(playerId)
     # players_cards = m.get_players_cards().copy()
     # suites = m.get_suites().copy()
     #Window(playerId, players_cards, suites)   
     print("hola1")
     running = True
     while running:
+        print_board(playerId)
         current_player = receive(socket_client)
         print(current_player)
         while "player" not in current_player:
             current_player= receive(socket_client)
         print(f"It's the turn of {current_player}\n")    
         if current_player == playerId:
-            action = turn(playerId)
+            action, mess = turn(playerId)
             mq.send(action.encode(), type=1)
+            if mess :
+                mq.send(mess.encode(), type=2)
             mq.send(b"end of the turn", type=3)
             send(socket_client, "end of the turn")
+            print("End of your turn.")
                                     
         else:
             action, t = mq.receive(type=1)
-            print(f"{current_player} choose to {action}")
-            mess, t = mq.receive(type=3)      
+            print(f"{current_player} choose to {action.decode()}")
+            if 'give hint' in action.decode():
+                hint, t = mq.receive(type=2)
+                print(hint.decode())
+            mess, t = mq.receive(type=3) 
+            print(f"End of the turn of {current_player}.")
+                 
     
         
 def turn(playerId):
@@ -63,14 +71,14 @@ def turn(playerId):
             #test qu'il met pas de 1? 
 
         if action == 1:
-            give_hint(playerId)
-            return("give hint")
+            message = give_hint(playerId)
+            return("give hint", message)
         
         elif action == 2:
             i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
             send(f"play card {str(i_card)}")
             #recevoir un message de confirmation depuis le jeu
-            return("play card")
+            return("play card", None)
             #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
 
         else:
@@ -117,8 +125,7 @@ def give_hint(player):
             if card in cards_of_number:
                 card["hint_number"] = True
     message = f"{playerId} gave a {hint_type} hint to {teammate} about {card[hint_type]}"
-    for player in players:
-        mq.send(message.encode(), type=2)  
+    return message
     
   
 def user():
@@ -178,14 +185,12 @@ def print_board(playerId):
             for card in cards :
                 num = card["number"]
                 color = card["color"]
+                printc(num, color=color, end="")
                 if card["hint_color"] :
-                    print(num, color=color, end="")
-                else:
-                    print(num, end="")
+                    print("c", end="  ")
                 if card["hint_number"] :
-                    print("*", end="  ")
-                else :
-                    print(end="  ")             
+                    print("n", end="  ")
+                print(end="  ")             
    
 def end_game(signum, frame):
     print("2")
