@@ -99,6 +99,7 @@ class HanabiGame:
                 return None                 
     
     def play_card(self, playerId):
+        print("fonction play_card")
         message = self.receive(playerId)
         i_card = int(message[-1])
         player_hand = list(m.get_players_cards().copy().values())
