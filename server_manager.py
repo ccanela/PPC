@@ -30,18 +30,21 @@ def set_tokens(key, value):
 
 # Use the mutex in the get and set functions for suites
 def get_suites():
-    with lock_suites:
-        return suites
+    lock_suites.acquire()
+    suites_copy = suites
+    lock_suites.release()
+    return suites_copy
 
 def set_suites(key, value):
-    with lock_suites:
-        suites[key] = value
+    lock_suites.acquire()
+    suites[key] = value
+    lock_suites.release()
 
 def get_players_cards():
     lock_players_cards.acquire() 
-    play = players_cards
+    play_cards_copy = players_cards
     lock_players_cards.release()
-    return play
+    return play_cards_copy
 
 def set_players_cards(key, value):
     lock_players_cards.acquire()

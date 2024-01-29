@@ -60,7 +60,7 @@ class HanabiGame:
             m.set_players_cards(f"player{player+1}", hand)
         #self.playersCards_mutex.release()
         print("fin init_deck")
-        # self.send("initCards")
+        self.send("initCards")
         print(str(players_cards))
         self.send(str(players_cards))
 
