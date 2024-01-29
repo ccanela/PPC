@@ -26,7 +26,7 @@ def player_process(playerId, socket_client, mq):
     
     data = receive(socket_client)
     while data != "initCards":
-        data = receive(socket_client) 
+        data = receive(socket_client)  
     players_cards = m.get_players_cards().copy()
     num_players = len(players_cards.keys())
     # suites = m.get_suites().copy()
@@ -36,10 +36,9 @@ def player_process(playerId, socket_client, mq):
     while running:
         print_board(playerId)
         current_player = receive(socket_client)
-        print(current_player)
         while "player" not in current_player:
             current_player= receive(socket_client)
-        print(f"It's the turn of {current_player}\n")    
+        print(f"\nIt's the turn of {current_player}\n")    
         if current_player == playerId:
             action, mess = turn(playerId, socket_client)
             for _ in range(num_players - 1):  # Send message to all players but current_player
@@ -246,6 +245,7 @@ if __name__ == "__main__" :
         print(f"You are the {playerId}")
     
         data = receive(socket_client)
+        print(data)
         while data != "start":
             data = receive(socket_client)
             
