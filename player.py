@@ -5,7 +5,6 @@ import signal
 import sys
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
-from affichage import *
 from print_color import print as printc
 
 class RemoteManager(BaseManager): pass
@@ -30,10 +29,7 @@ def player_process(playerId, socket_client, mq):
     print(data)    
     players_cards = m.get_players_cards().copy()
     num_players = len(players_cards.keys())
-    print(players_cards)
-    suites = m.get_suites().copy()
-    w = Window(playerId, players_cards, suites)   
-    print("hola1")
+    print(players_cards)  
     running = True
     while running:
         print_board(playerId)
