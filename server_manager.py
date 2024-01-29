@@ -7,6 +7,7 @@ while True:
         break
     else:
         print("Invalid option. Please enter a number between 2 and 5.")
+print("You can now run the Game.")
 
 # Create Lock objects
 lock_tokens = Lock()

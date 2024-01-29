@@ -26,31 +26,27 @@ def player_process(playerId, socket_client, mq):
     
     data = receive(socket_client)
     while data != "initCards":
-        data = receive(socket_client)  
-    print(data)    
+        data = receive(socket_client)     
     players_cards = m.get_players_cards().copy()
     num_players = len(players_cards.keys())
-    print(players_cards)
     # suites = m.get_suites().copy()
     # Window(playerId, players_cards, suites)   
-    print("hola1")
     running = True
     while running:
         print_board(playerId)
         current_player = receive(socket_client)
         while "player" not in current_player:
             current_player= receive(socket_client)
-        print(f"\nIt's the turn of {current_player}\n")    
+        print(f"\n\nIt's the turn of {current_player}\n")    
         if current_player == playerId:
             action, mess = turn(playerId, socket_client)
             for _ in range(num_players - 1):  # Send message to all players but current_player
-                mq.send(action.encode(), type=1)                
+                mq.send(action.encode(), type=1)               
                 if 'give hint' in action :
                     mq.send(mess.encode(), type=2)    
                 mq.send(b"end of the turn", type=3)
             if 'play card' in action:
-                message = receive(socket_client)
-                print("\n"+message)    
+                print("\n"+mess)      
             send(socket_client, "end of the turn")
             print("End of your turn.")
                                     
@@ -62,10 +58,12 @@ def player_process(playerId, socket_client, mq):
                 print("\n"+message)
             elif 'give hint' in action.decode():
                 hint, t = mq.receive(type=2)
-                print("\n"+hint.decode())
+                print("\n"+hint.decode()) 
             mess, t = mq.receive(type=3) 
             print(f"End of the turn of {current_player}.")
-                 
+        gameContinue = receive(socket_client)
+        while 'game' not in gameContinue:            
+            gameContinue = receive(socket_client) 
     
         
 def turn(playerId, socket):
@@ -96,9 +94,8 @@ def turn(playerId, socket):
                 else:
                     print("Invalid card index. Please try again.")
             send(socket, f"play card {str(i_card -1)}")
-            done = receive(socket)
-            return("play card", None)
-          
+            message = receive(socket_client)
+            return("play card", message)
 
 def give_hint(player):
     info_tk = m.get_tokens()._getvalue()["info_tk"]
@@ -240,12 +237,26 @@ def end_game(signum, frame):
     #socket_client.close()
     #normalement sys.exit(0) s'occupe de vider toutes les ressources 
     sys.exit(0)
-        
+    
+def gameRules():
+    printc('\n\nHanabi Game', format='bold', color='cyan')
+    printc("\n\nRules : \n", format='bold')  
+    print("This is a cooperative game where you can only see the cards of other players.\n"+
+          "The board is composed by as many suites as the number of players. The suites are in ascending order.\n"
+          "When your turn come, you can play one of your cards or give a hint to an other player\n"+
+          "To play a card, the suites of the color card corresponding needs to contain the first number\nbefore the number of the card you want to play."+
+          "If the card you want to play is not suitable, you lose one Fuse Token.\nIf you achieve one complete suite (from 1 to 5), you regain one Info Token."+
+          "To give a hint to an other player, you need to have at least\none Info Token (you lose it while you are giving the hint).\n"+
+          "When a color hint is given about a card, the player is advertised for all the cards of this color.\n"+
+          "All the players can see when a hint is given. The card is followed by 'n'\nif this is a number hint or/and by 'c' if this is a color hint."+
+          "When you lose all your Fuse Tokens, you lose the Hanabi Game.\nBut if you achieve to complete all the suites, you win !!\n\n"          
+          )  
 
 if __name__ == "__main__" :
     key = 100
     mq = ipc.MessageQueue(key, ipc.IPC_CREAT)
     pid = os.getpid()
+    gameRules()
     user()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_client :
         host = 'localhost'
