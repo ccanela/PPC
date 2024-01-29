@@ -97,34 +97,28 @@ class HanabiGame:
         print(card)
         card_color = card['color']
         card_number = card['number']
-        #self.suites_mutex.acquire()
         suites = m.get_suites().copy()
-        if card_number == suites[card_color] + 1:
-            print(f"You played successfully a {card_color} {card_number}")
-            m.set_suites(card_color, card_number) 
-            #self.suites_mutex.release()
-            if card_number == 5: 
-                #self.tokens_mutex.acquire()
-                info_tk = m.get_tokens().copy()["info_tk"]
-                m.set_tokens("info_tk", info_tk+1) 
-                #self.tokens_mutex.release()
-
-        else:
-            #self.tokens_mutex.acquire()
-            fuse_tk = m.get_tokens().copy()["fuse_tk"]
-            print(fuse_tk)
-            m.set_tokens("fuse_tk", fuse_tk - 1)
-            #self.tokens_mutex.release()
-
         if len(self.deck) > 0:
-            #self.deck_mutex.acquire()
-            #self.playersCards_mutex.acquire()
             new_card = self.deck.pop()
             players_cards[playerId].append(new_card)
             m.set_players_cards(playerId, players_cards[playerId])
-            #self.deck_mutex.release()
-            #self.playersCards_mutex.release()
+        
+        if card_number == suites[card_color] + 1:
+            message = f"You played successfully a {card_color} {card_number}."
+            m.set_suites(card_color, card_number) 
+            if card_number == 5: 
+                info_tk = m.get_tokens().copy()["info_tk"]
+                m.set_tokens("info_tk", info_tk+1)   
+                message += "\nYou have regained an Info Token.\n" 
+
+        else:
+            fuse_tk = m.get_tokens().copy()["fuse_tk"]
+            print(fuse_tk)
+            m.set_tokens("fuse_tk", fuse_tk - 1)   
+            message = f"Bad luck, you lost a Fuse Token.\n"
+                 
         self.send("done", player=playerId)
+        return(message)
 
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
@@ -166,7 +160,8 @@ class HanabiGame:
             data = self.receive(playerId)
             if "play card" in data:
                 i_card = int(data[-1])
-                self.play_card(playerId, i_card)
+                mess = self.play_card(playerId, i_card)
+                self.send(mess)
             else:
                 end = True
         print("fin du tour")        

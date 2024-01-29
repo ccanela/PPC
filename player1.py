@@ -45,8 +45,11 @@ def player_process(playerId, socket_client, mq):
             action, mess = turn(playerId, socket_client)
             for _ in range(num_players - 1):  # Send message to all players but current_player
                 mq.send(action.encode(), type=1)
-                if mess :
-                    mq.send(mess.encode(), type=2)
+                if 'play card' in action:
+                    message = receive(socket_client)
+                    print("\n"+message)
+                elif 'give hint' in action :
+                    mq.send(mess.encode(), type=2)    
                 mq.send(b"end of the turn", type=3)
             send(socket_client, "end of the turn")
             print("End of your turn.")
@@ -54,9 +57,12 @@ def player_process(playerId, socket_client, mq):
         else:
             action, t = mq.receive(type=1)
             print(f"{current_player} choose to {action.decode()}")
-            if 'give hint' in action.decode():
+            if 'play card' in action.decode():
+                message = receive(socket_client)
+                print("\n"+message)
+            elif 'give hint' in action.decode():
                 hint, t = mq.receive(type=2)
-                print(hint.decode())
+                print("\n"+hint.decode())
             mess, t = mq.receive(type=3) 
             print(f"End of the turn of {current_player}.")
                  
@@ -78,7 +84,7 @@ def turn(playerId, socket):
             return("give hint", message)
         
         elif action == 2:
-            i_card = int(input("Type de index of the card you want to play (from 1 to 5)"))
+            i_card = int(input("Type de index of the card you want to play (from 1 to 5) "))
             send(socket, f"play card {str(i_card -1)}")
             done = receive(socket)
             #recevoir un message de confirmation depuis le jeu
@@ -131,7 +137,7 @@ def give_hint(player):
         if 1 <= card_index <= 5:
             break
         else:
-            print("Invalid option. Please enter a number between 1 and 5.")
+            print("Invalid option. Please enter a number between 1 and 5. ")
     card = cards[card_index - 1]
 
     if hint_type == "color":
@@ -181,7 +187,7 @@ def print_board(playerId):
     suites = m.get_suites().copy()
     players_cards = m.get_players_cards().copy()
     tokens = m.get_tokens().copy()
-    printc("\nBoard :\n", format='bold')
+    printc("\n\n\nBoard :\n", format='bold')
     print(f"\nFuse Tokens : {tokens['fuse_tk']}")
     print(f"Info Tokens : {tokens['info_tk']}")
     print("\n\nSuites :", end="  ")
