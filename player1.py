@@ -27,9 +27,9 @@ def player_process(playerId, socket_client, mq):
     data = receive(socket_client)
     while data != "initCards":
         data = receive(socket_client) #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
-    # players_cards = m.get_players_cards().copy()
-    # suites = m.get_suites().copy()
-    #Window(playerId, players_cards, suites)   
+    players_cards = m.get_players_cards().copy()
+    suites = m.get_suites().copy()
+    Window(playerId, players_cards, suites)   
     print("hola1")
     running = True
     while running:
