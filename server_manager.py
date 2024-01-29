@@ -35,7 +35,7 @@ def get_suites():
 
 def set_suites(key, value):
     with lock_suites:
-        lock_suites[key] = value
+        suites[key] = value
 
 def get_players_cards():
     with lock_players_cards:
