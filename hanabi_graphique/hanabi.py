@@ -32,6 +32,7 @@ class HanabiGame:
         self.players_info = players_info
         self.send("start")                      
         self.init_deck(num_players)
+        print("appel fonction start_game")
         self.start_game()
                        
         
@@ -48,6 +49,7 @@ class HanabiGame:
                 card = self.deck.pop()
                 hand.append(card)
             m.set_players_cards(f"player{player+1}", hand)
+        print("fin init_deck")
         self.send("initCards")
 
     def send(self, mess, player="all"):
@@ -79,8 +81,10 @@ class HanabiGame:
                 return None                 
     
     def play_card(self, playerId, i_card):
+        print("fonction play_card")
         players_cards = dict(m.get_players_cards().copy())
         card = players_cards[playerId].pop(i_card)
+        print(card)
         card_color = card['color']
         card_number = card['number']
         suites = m.get_suites().copy()
@@ -90,7 +94,7 @@ class HanabiGame:
             m.set_players_cards(playerId, players_cards[playerId])
         
         if card_number == suites[card_color] + 1:
-            message = f"{playerId} played successfully a {card_color} {card_number}."
+            message = f"You played successfully a {card_color} {card_number}."
             m.set_suites(card_color, card_number) 
             if card_number == 5: 
                 info_tk = m.get_tokens().copy()["info_tk"]
@@ -99,15 +103,19 @@ class HanabiGame:
 
         else:
             fuse_tk = m.get_tokens().copy()["fuse_tk"]
+            print(fuse_tk)
             m.set_tokens("fuse_tk", fuse_tk - 1)   
             message = f"Bad luck, you lost a Fuse Token.\n"
                  
-        self.send(message)
+        self.send("done", player=playerId)
+        return(message)
 
     def check_end(self):
         # Check if the third Storm token is turned lightning-side-up
         fuse_tk = m.get_tokens().copy()["fuse_tk"]
         suites = m.get_suites().copy()
+        print("coucou1")
+        print(fuse_tk)
         if fuse_tk == 0:
             for info in self.players_info.values():
                 pid = info["pid"]
@@ -118,10 +126,10 @@ class HanabiGame:
                     print(f"Error: Process with PID: {pid} NOT FOUND")
                 except PermissionError:
                     print(f"Error: No permission to send a signal to the process {pid}")
-            self.send("end of the game")        
             sys.exit(0)        
 
         elif all(card == 5 for card in suites.values()):
+            print("2")
             for info in self.players_info.values():
                 pid = info["pid"]
                 try:
@@ -131,12 +139,12 @@ class HanabiGame:
                     print(f"Error: Process with PID: {pid} NOT FOUND")
                 except PermissionError:
                     print(f"Error: No permission to send a signal to the process {pid}")
-            
-            self.send("end of the game")            
+        
             os._exit(0)          
 
        
     def player_turn(self, playerId):
+        print("hola player_turn")
         end = False
         while not end:
             data = self.receive(playerId)
@@ -145,19 +153,26 @@ class HanabiGame:
                 mess = self.play_card(playerId, i_card)
                 self.send(mess)
             else:
-                end = True      
+                end = True
+        print("fin du tour")        
 
     def start_game(self):
+        print("hola start_game")
         players = list(self.players_info.keys())
         i_player = 0
         running = True
         while running:
             current_player = players[i_player]
+            print(current_player)
             self.send(current_player)
+            print("appel fonction player_turn")
             self.player_turn(current_player)
-            self.check_end()
-            self.send("the game continue")            
+            self.check_end()            
             i_player = (i_player + 1) % len(players)
+            print("coucou")
+            print(players)
+            print(len(players))
+            print(i_player)
 
  
 if __name__ == "__main__":
