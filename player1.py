@@ -36,7 +36,6 @@ def player_process(playerId, socket_client, mq):
     while running:
         print_board(playerId)
         current_player = receive(socket_client)
-        print(current_player)
         while "player" not in current_player:
             current_player= receive(socket_client)
         print(f"It's the turn of {current_player}\n")    
