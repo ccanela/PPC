@@ -138,10 +138,10 @@ def give_hint(player):
             break
         else:
             print("Invalid option. Please enter a number between 1 and 5. ")
-    card = cards[card_index - 1]
+    card_chosen = cards[card_index - 1]
 
     if hint_type == "color":
-        color = card['color']
+        color = card_chosen['color']
         cards_of_color = [card for card in cards if card['color'] == color]
         for card in cards:
             if card in cards_of_color:
@@ -149,13 +149,13 @@ def give_hint(player):
                 m.set_players_cards(teammate, cards)
 
     if hint_type == "number":
-        num = card['number'] 
+        num = card_chosen['number'] 
         cards_of_number = [card for card in cards if card['number'] == num]
         for card in cards:
             if card in cards_of_number:
                 card["hint_number"] = True
                 m.set_players_cards(teammate, cards)
-    message = f"{playerId} gave a {hint_type} hint to {teammate} about {card[hint_type]}"
+    message = f"{playerId} gave a {hint_type} hint to {teammate} about {card_chosen[hint_type]}"
     return message
     
   
