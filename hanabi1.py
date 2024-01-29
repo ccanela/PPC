@@ -61,8 +61,6 @@ class HanabiGame:
         #self.playersCards_mutex.release()
         print("fin init_deck")
         self.send("initCards")
-        print(str(players_cards))
-        self.send(str(players_cards))
 
     def send(self, mess, player="all"):
         if player == "all":

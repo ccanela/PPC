@@ -27,8 +27,10 @@ def player_process(playerId, socket_client, mq):
     data = receive(socket_client)
     while data != "initCards":
         data = receive(socket_client)  
+    print(data)    
     players_cards = m.get_players_cards().copy()
     num_players = len(players_cards.keys())
+    print(players_cards)
     # suites = m.get_suites().copy()
     # Window(playerId, players_cards, suites)   
     print("hola1")
