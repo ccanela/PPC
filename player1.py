@@ -70,30 +70,34 @@ def player_process(playerId, socket_client, mq):
         
 def turn(playerId, socket):
         print("Which action do you want to do?\n")
-        #mutex
         tokens = m.get_tokens().copy()
         info_tk = tokens["info_tk"]
-        if info_tk > 0 :
-            action = int(input("1. Give a hint\n2. Play a card\n"))
-        else :
-            action = int(input("You don't have any info tokens left, you can only play a card. Type 2 to continue\n"))   
-            #test qu'il met pas de 1? 
+        while True:
+            if info_tk > 0 :
+                action = input("1. Give a hint\n2. Play a card\n")
+            else :
+                action = input("You don't have any info tokens left, you can only play a card. Type 2 to continue\n")
+            if action.isdigit() and (info_tk > 0 and action in ['1', '2'] or action == '2'):
+                action = int(action)
+                break
+            else:
+                print("Invalid action. Please try again.")
 
         if action == 1:
             message = give_hint(playerId)
             return("give hint", message)
-        
+
         elif action == 2:
-            i_card = int(input("Type de index of the card you want to play (from 1 to 5) "))
+            while True:
+                i_card = input("Type the index of the card you want to play (from 1 to 5) ")
+                if i_card.isdigit() and 1 <= int(i_card) <= 5:
+                    i_card = int(i_card)
+                    break
+                else:
+                    print("Invalid card index. Please try again.")
             send(socket, f"play card {str(i_card -1)}")
             done = receive(socket)
-            #recevoir un message de confirmation depuis le jeu
             return("play card", None)
-            #faut chercher une façon de dire au jeu qu'on veut jouer cette carte (on a besoin de l'indice et current_player)
-
-        else:
-            print("Invalid action. Please try again.")
-            return(turn(playerId))
           
 
 def give_hint(player):

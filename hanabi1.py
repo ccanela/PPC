@@ -24,10 +24,7 @@ class HanabiGame:
     def __init__(self, num_players, players_info):
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'purple'][:num_players]
-        #self.suites = m.get_suites() je crois que ça n'a pas de sens parce que c'est dans la memoire partagé pas dans la classe 
         self.discard = []
-        #self.players_cards = m.get_players_cards()
-        #self.tokens = m.get_tokens()
         self.deck_mutex = th.Lock() 
         self.suites_mutex = th.Lock()
         self.playersCards_mutex = th.Lock()
@@ -43,22 +40,15 @@ class HanabiGame:
         numbers = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
         num_cards_in_hand = 5
         
-        #self.deck_mutex.acquire()
         self.deck = [{'color': color, 'number': number, 'hint_color': False, 'hint_number': False} for color in self.colors for number in numbers]
         random.shuffle(self.deck)
-        #self.deck_mutex.release()
 
-        #self.playersCards_mutex.acquire()
-        
         for player in range(num_players):
             hand = []
             for _ in range(num_cards_in_hand):
-                #self.deck_mutex.acquire()
                 card = self.deck.pop()
-                #self.deck_mutex.release()
                 hand.append(card)
             m.set_players_cards(f"player{player+1}", hand)
-        #self.playersCards_mutex.release()
         print("fin init_deck")
         self.send("initCards")
 

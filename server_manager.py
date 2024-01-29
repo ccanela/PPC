@@ -12,7 +12,8 @@ while True:
 lock_tokens = Lock()
 lock_suites = Lock()
 lock_players_cards = Lock()
-#Utilisation des remote managers pour la shared memory
+
+#Use of remote managers for shared memory
 colors = ['red', 'blue', 'green', 'yellow', 'purple'][:num_players]
 tokens = {"info_tk" : 3 + num_players, "fuse_tk" : 3}
 suites = {color: 0 for color in colors}
@@ -29,15 +30,12 @@ def set_tokens(key, value):
 
 # Use the mutex in the get and set functions for suites
 def get_suites():
-    lock_suites.acquire()
-    suites_copy = suites
-    lock_suites.release()
-    return suites_copy
+    with lock_suites:
+        return suites
 
 def set_suites(key, value):
-    lock_suites.acquire()
-    suites[key] = value
-    lock_suites.release()
+    with lock_suites:
+        lock_suites[key] = value
 
 def get_players_cards():
     with lock_players_cards:
