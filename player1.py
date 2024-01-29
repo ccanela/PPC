@@ -27,7 +27,8 @@ def player_process(playerId, socket_client, mq):
     data = receive(socket_client)
     while data != "initCards":
         data = receive(socket_client) 
-    # players_cards = m.get_players_cards().copy()
+    players_cards = m.get_players_cards().copy()
+    num_players = len(players_cards.keys())
     # suites = m.get_suites().copy()
     # Window(playerId, players_cards, suites)   
     print("hola1")
@@ -41,10 +42,11 @@ def player_process(playerId, socket_client, mq):
         print(f"It's the turn of {current_player}\n")    
         if current_player == playerId:
             action, mess = turn(playerId, socket_client)
-            mq.send(action.encode(), type=1)
-            if mess :
-                mq.send(mess.encode(), type=2)
-            mq.send(b"end of the turn", type=3)
+            for _ in range(num_players - 1):  # Send message to all players but current_player
+                mq.send(action.encode(), type=1)
+                if mess :
+                    mq.send(mess.encode(), type=2)
+                mq.send(b"end of the turn", type=3)
             send(socket_client, "end of the turn")
             print("End of your turn.")
                                     
@@ -99,11 +101,11 @@ def give_hint(player):
         print("Which player do you want to give a hint to ? ")
         for i, player in enumerate(players): 
             print(f"{i+1}. {player}")
-        i_teammate = int(input(""))
-        if 1 <= i_teammate <= len(players)-1:
+        i_teammate = int(input())
+        if 1 <= i_teammate <= len(players):
             break
         else:
-            print("Invalid option. Please enter a number between 1 and ", len(players))
+            print("Invalid option. Please enter a number between 1 and ",len(players))
     teammate = players[i_teammate-1]
     # Get the teammate's cards
     players_cards = m.get_players_cards().copy()
