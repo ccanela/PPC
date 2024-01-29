@@ -1,4 +1,5 @@
 from multiprocessing.managers import BaseManager
+from multiprocessing import Lock 
 
 while True:
     num_players = int(input("How many players? "))
@@ -7,21 +8,41 @@ while True:
     else:
         print("Invalid option. Please enter a number between 2 and 5.")
 
-
+# Create Lock objects
+lock_tokens = Lock()
+lock_suites = Lock()
+lock_players_cards = Lock()
 #Utilisation des remote managers pour la shared memory
 colors = ['red', 'blue', 'green', 'yellow', 'purple'][:num_players]
 tokens = {"info_tk" : 3 + num_players, "fuse_tk" : 3}
 suites = {color: 0 for color in colors}
 players_cards = {f"player{i+1}": [] for i in range(num_players)}
 
-def set_players_cards(key, value):
-    players_cards[key] = value
+# Use the mutex in the get and set functions for tokens
+def get_tokens():
+    with lock_tokens:
+        return tokens
 
 def set_tokens(key, value):
-    tokens[key] = value
+    with lock_tokens:
+        tokens[key] = value
 
-def set_suites(key, value): 
-    suites[key] = value
+# Use the mutex in the get and set functions for suites
+def get_suites():
+    with lock_suites:
+        return suites
+
+def set_suites(key, value):
+    with lock_suites:
+        suites[key] = value
+
+def get_players_cards():
+    with lock_players_cards:
+        return players_cards
+
+def set_players_cards(key, value):
+    with lock_players_cards:
+        players_cards[key] = value
 
 class RemoteManager(BaseManager): pass
 
