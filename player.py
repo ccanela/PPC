@@ -33,10 +33,10 @@ def player_process(playerId, socket_client, mq):
     while running:
         print_board(playerId)
         current_player = receive(socket_client)
-        print(current_player)
         while "player" not in current_player:
             current_player= receive(socket_client)
-        print(f"\n\nIt's the turn of {current_player}\n")    
+        print(f"\n\nIt's the turn of {current_player}\n")  
+          
         if current_player == playerId:
             action, mess = turn(playerId, socket_client)
             for _ in range(num_players - 1):  # Send message to all players but current_player
@@ -60,8 +60,8 @@ def player_process(playerId, socket_client, mq):
                 print("\n"+hint.decode()) 
             mess, t = mq.receive(type=3) 
             print(f"End of the turn of {current_player}.")
+            
         gameContinue = receive(socket_client)
-        print(gameContinue)
         while 'game' not in gameContinue:            
             gameContinue = receive(socket_client) 
         send(socket_client, "ok")    
@@ -270,7 +270,7 @@ if __name__ == "__main__" :
         print(f"You are the {playerId}")
     
         data = receive(socket_client)
-        print(data)
+        # print(data)
         while data != "start":
             data = receive(socket_client)
             

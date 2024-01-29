@@ -186,7 +186,7 @@ if __name__ == "__main__":
             playerId = f"player{players_connected}" 
             conn.sendall(playerId.encode())      
             players_info[playerId] = {"socket": (conn, addr), "pid": int(pid)}
-            print(players_info)
+            # print(players_info)
             
         print("Starting game")       
         
