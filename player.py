@@ -44,13 +44,13 @@ def player_process(playerId, socket_client, mq):
         if current_player == playerId:
             action, mess = turn(playerId, socket_client)
             for _ in range(num_players - 1):  # Send message to all players but current_player
-                mq.send(action.encode(), type=1)
-                if 'play card' in action:
-                    message = receive(socket_client)
-                    print("\n"+message)
-                elif 'give hint' in action :
+                mq.send(action.encode(), type=1)                
+                if 'give hint' in action :
                     mq.send(mess.encode(), type=2)    
                 mq.send(b"end of the turn", type=3)
+            if 'play card' in action:
+                message = receive(socket_client)
+                print("\n"+message)    
             send(socket_client, "end of the turn")
             print("End of your turn.")
                                     
