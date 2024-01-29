@@ -44,8 +44,9 @@ def get_players_cards():
     return play
 
 def set_players_cards(key, value):
-    with lock_players_cards:
-        players_cards[key] = value
+    lock_players_cards.acquire()
+    players_cards[key] = value
+    lock_players_cards.release()
 
 class RemoteManager(BaseManager): pass
 
