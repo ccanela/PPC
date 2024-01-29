@@ -1,16 +1,11 @@
 import sys 
-#import paramiko
-#import errno
 import random
 import socket
 import os 
 import signal
-#import sysv_ipc as ipc
 import threading as th
 from multiprocessing.managers import BaseManager
-from queue import Queue
-import multiprocessing as mp 
-from test_button2 import *
+# from affichage import *
 
 class RemoteManager(BaseManager): pass
 
@@ -27,7 +22,6 @@ m.connect()
 
 class HanabiGame:
     def __init__(self, num_players, players_info):
-        print("init HanabiGame")
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'purple'][:num_players]
         #self.suites = m.get_suites() je crois que ça n'a pas de sens parce que c'est dans la memoire partagé pas dans la classe 
@@ -201,24 +195,6 @@ if __name__ == "__main__":
 
     players_cards = m.get_players_cards()
     num_players = len(players_cards.keys())
-    
-    # if len(sys.argv) < 2:
-    #     print("required index argument missing, terminating.", file=sys.stderr)
-    #     sys.exit(1)
-        
-    # try:
-    #     num_players = int(sys.argv[1])
-    # except ValueError:
-    #     print("bad index argument: {}, terminating.".format(sys.argv[1]), file=sys.stderr)
-    #     sys.exit(2)
-        
-    # if num_players < 0:
-    #     print("negative index argument: {}, terminating.".format(num_players), file=sys.stderr)
-    #     sys.exit(3)
-    
-    # elif num_players > 5:
-    #     print("bad index argument (too many players): {}, terminating.".format(num_players), file=sys.stderr)
-    #     sys.exit(4)    
     
     players_connected = 0 
     players_info = {}

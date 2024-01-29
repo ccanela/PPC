@@ -5,7 +5,7 @@ import signal
 import sys
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
-from test_button2 import *
+# from affichage import *
 from print_color import print as printc
 
 class RemoteManager(BaseManager): pass
@@ -26,11 +26,11 @@ def player_process(playerId, socket_client, mq):
     
     data = receive(socket_client)
     while data != "initCards":
-        data = receive(socket_client) #je ne sais pas pourquoi il y a ça mais on envoie jamais "initCards" et c'était une boucle infinie
+        data = receive(socket_client) 
     players_cards = m.get_players_cards().copy()
     num_players = len(players_cards.keys())
-    suites = m.get_suites().copy()
-    #Window(playerId, players_cards, suites)   
+    # suites = m.get_suites().copy()
+    # Window(playerId, players_cards, suites)   
     print("hola1")
     running = True
     while running:
@@ -210,7 +210,7 @@ def print_board(playerId):
                 color = card["color"]
                 printc(num, color=color, end="")
                 if card["hint_color"] :
-                    print("c", end="  ")
+                    print("c", end="")
                 if card["hint_number"] :
                     print("n", end="")
                 print(end="  ")             
