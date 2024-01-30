@@ -2,6 +2,7 @@ import sys
 import random
 import socket
 import os 
+import time
 import signal
 import threading as th
 from multiprocessing.managers import BaseManager
@@ -144,7 +145,7 @@ class HanabiGame:
                     print(f"Error: Process with PID: {pid} NOT FOUND")
                 except PermissionError:
                     print(f"Error: No permission to send a signal to the process {pid}")
-            self.send("end of the game")        
+            self.send("end of the game")                  
             sys.exit(0)        
 
         elif all(card == 5 for card in suites.values()):
@@ -158,7 +159,7 @@ class HanabiGame:
                 except PermissionError:
                     print(f"Error: No permission to send a signal to the process {pid}")
             
-            self.send("end of the game")            
+            self.send("end of the game")         
             sys.exit(0)          
 
  

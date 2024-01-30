@@ -3,6 +3,7 @@ import socket
 import os 
 import signal 
 import sys
+import atexit
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
 from print_color import print as printc
@@ -18,6 +19,7 @@ RemoteManager.register('set_suites')
 m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
 m.connect()
 
+<<<<<<< HEAD
 def player_process(playerId, socket_client, mq):
     """
     This function handles the process for a single player in hanabi game.
@@ -38,6 +40,15 @@ def player_process(playerId, socket_client, mq):
     """   
     signal.signal(signal.SIGUSR1, end_game)  #signal for vicotry
     signal.signal(signal.SIGUSR2, end_game)  #signal for loss
+=======
+def player_process(playerId):
+    
+    global mq
+    global socket_client
+     
+    signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
+    signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
+>>>>>>> 42e6f1aaac5d0824234843febc895a03c8ef715d
    
     data = receive(socket_client)      
     while data != "initCards":
@@ -54,7 +65,7 @@ def player_process(playerId, socket_client, mq):
         print(f"\n\nIt's the turn of {current_player}\n")  
           
         if current_player == playerId:
-            action, mess = turn(playerId, socket_client)
+            action, mess = turn(playerId)
             for _ in range(num_players - 1):  # Send message to all players but current_player
                 mq.send(action.encode(), type=1)               
                 if 'give hint' in action :
@@ -78,11 +89,13 @@ def player_process(playerId, socket_client, mq):
             print(f"End of the turn of {current_player}.")
             
         gameContinue = receive(socket_client)
+        print(gameContinue)
         while 'game' not in gameContinue:            
             gameContinue = receive(socket_client) 
         send(socket_client, "ok")    
     
         
+<<<<<<< HEAD
 def turn(playerId, socket):
         """
         This function handles a single turn for a player in the game of Hanabi.
@@ -105,33 +118,40 @@ def turn(playerId, socket):
         print("Which action do you want to do?\n")
         tokens = m.get_tokens().copy()
         info_tk = tokens["info_tk"]
+=======
+def turn(playerId):
+    global socket_client
+    print("Which action do you want to do?\n")
+    tokens = m.get_tokens().copy()
+    info_tk = tokens["info_tk"]
+    while True:
+        if info_tk > 0 :
+            action = input("1. Give a hint\n2. Play a card\n")
+        else :
+            action = input("You don't have any info tokens left, you can only play a card. Type 2 to continue\n")
+        if action.isdigit() and (info_tk > 0 and action in ['1', '2'] or action == '2'):
+            action = int(action)
+            break
+        else:
+            print("Invalid action. Please try again.")
+
+    if action == 1:
+        message = give_hint(playerId)
+        return("give hint", message)
+
+    elif action == 2:
+>>>>>>> 42e6f1aaac5d0824234843febc895a03c8ef715d
         while True:
-            if info_tk > 0 :
-                action = input("1. Give a hint\n2. Play a card\n")
-            else :
-                action = input("You don't have any info tokens left, you can only play a card. Type 2 to continue\n")
-            if action.isdigit() and (info_tk > 0 and action in ['1', '2'] or action == '2'):
-                action = int(action)
+            i_card = input("Type the index of the card you want to play (from 1 to 5) ")
+            if i_card.isdigit() and 1 <= int(i_card) <= 5:
+                i_card = int(i_card)
                 break
             else:
-                print("Invalid action. Please try again.")
-
-        if action == 1:
-            message = give_hint(playerId)
-            return("give hint", message)
-
-        elif action == 2:
-            while True:
-                i_card = input("Type the index of the card you want to play (from 1 to 5) ")
-                if i_card.isdigit() and 1 <= int(i_card) <= 5:
-                    i_card = int(i_card)
-                    break
-                else:
-                    print("Invalid card index. Please try again.")
-            send(socket, f"play card {str(i_card -1)}")
-            message = receive(socket_client)
-            print(message)
-            return("play card", message)
+                print("Invalid card index. Please try again.")
+        send(socket_client, f"play card {str(i_card -1)}")
+        message = receive(socket_client)
+        print(message)
+        return("play card", message)
 
 def give_hint(player):
     """
@@ -217,6 +237,7 @@ def give_hint(player):
     return message
    
 def end_game(signum, frame):
+<<<<<<< HEAD
     """
     This function handles the end of the game.
 
@@ -233,10 +254,16 @@ def end_game(signum, frame):
     Returns:
     None
     """
+=======
+>>>>>>> 42e6f1aaac5d0824234843febc895a03c8ef715d
     if signum == signal.SIGUSR1:
         print(f"Signal received: {signum}. Game status: Victory!!!")
     if signum == signal.SIGUSR2:
         print(f"Signal received: {signum}. Game status:  Loss")
+<<<<<<< HEAD
+=======
+        #affichage ou timer 
+>>>>>>> 42e6f1aaac5d0824234843febc895a03c8ef715d
     sys.exit(0)
     
 def gameRules():
@@ -344,8 +371,7 @@ def send(socket_connexion, data):
         socket_connexion.sendall(data_encoded)   
     except Exception as e:
         print(f"Error when sending data : {e}")    
-   
-        
+           
 def receive(socket_connexion, buffer_size=1024):
     """
     This function receives data over a socket connection.
@@ -387,7 +413,7 @@ def user():
     while answer != 1:
         print("1. to join the game")
         answer = int(input())
-    return  
+    return 
 
 
 """
@@ -428,4 +454,4 @@ if __name__ == "__main__" :
             
         print("Starting game")
         
-        player_process(playerId, socket_client, mq)                          
+        player_process(playerId)                          
