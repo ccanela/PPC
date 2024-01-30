@@ -19,7 +19,6 @@ RemoteManager.register('set_suites')
 m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
 m.connect()
 
-<<<<<<< HEAD
 def player_process(playerId, socket_client, mq):
     """
     This function handles the process for a single player in hanabi game.
@@ -40,7 +39,6 @@ def player_process(playerId, socket_client, mq):
     """   
     signal.signal(signal.SIGUSR1, end_game)  #signal for vicotry
     signal.signal(signal.SIGUSR2, end_game)  #signal for loss
-=======
 def player_process(playerId):
     
     global mq
@@ -48,7 +46,6 @@ def player_process(playerId):
      
     signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
     signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
->>>>>>> 42e6f1aaac5d0824234843febc895a03c8ef715d
    
     data = receive(socket_client)      
     while data != "initCards":
@@ -95,7 +92,6 @@ def player_process(playerId):
         send(socket_client, "ok")    
     
         
-<<<<<<< HEAD
 def turn(playerId, socket):
         """
         This function handles a single turn for a player in the game of Hanabi.
@@ -118,7 +114,6 @@ def turn(playerId, socket):
         print("Which action do you want to do?\n")
         tokens = m.get_tokens().copy()
         info_tk = tokens["info_tk"]
-=======
 def turn(playerId):
     global socket_client
     print("Which action do you want to do?\n")
@@ -140,7 +135,6 @@ def turn(playerId):
         return("give hint", message)
 
     elif action == 2:
->>>>>>> 42e6f1aaac5d0824234843febc895a03c8ef715d
         while True:
             i_card = input("Type the index of the card you want to play (from 1 to 5) ")
             if i_card.isdigit() and 1 <= int(i_card) <= 5:
@@ -203,7 +197,8 @@ def give_hint(player):
 
     # Ask the player if they want to give a number or color hint
     while True:
-        hint_type = input("\nDo you want to give a number or color hint? ")
+        hint_type = input("\nDo you want to give a number or color hint? ").lower()
+        
         if hint_type in ["number", "color"]:
             break
         else:
@@ -237,7 +232,6 @@ def give_hint(player):
     return message
    
 def end_game(signum, frame):
-<<<<<<< HEAD
     """
     This function handles the end of the game.
 
@@ -254,16 +248,10 @@ def end_game(signum, frame):
     Returns:
     None
     """
-=======
->>>>>>> 42e6f1aaac5d0824234843febc895a03c8ef715d
     if signum == signal.SIGUSR1:
         print(f"Signal received: {signum}. Game status: Victory!!!")
     if signum == signal.SIGUSR2:
         print(f"Signal received: {signum}. Game status:  Loss")
-<<<<<<< HEAD
-=======
-        #affichage ou timer 
->>>>>>> 42e6f1aaac5d0824234843febc895a03c8ef715d
     sys.exit(0)
     
 def gameRules():
