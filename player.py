@@ -37,23 +37,14 @@ def player_process(playerId, socket_client, mq):
     """   
     signal.signal(signal.SIGUSR1, end_game)  #signal for vicotry
     signal.signal(signal.SIGUSR2, end_game)  #signal for loss
-<<<<<<< HEAD
-=======
-
->>>>>>> cb00d88011e76911688576bb1bab8bde96efcd45
 def player_process(playerId):
     
     global mq
     global socket_client
      
-<<<<<<< HEAD
-    signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
-    signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
-=======
     signal.signal(signal.SIGUSR1, end_game)  #signal for victory
     signal.signal(signal.SIGUSR2, end_game)  #signal for game over
 
->>>>>>> cb00d88011e76911688576bb1bab8bde96efcd45
    
     data = receive(socket_client)      
     while data != "initCards":
@@ -99,31 +90,6 @@ def player_process(playerId):
         send(socket_client, "ok")    
     
         
-<<<<<<< HEAD
-def turn(playerId, socket):
-        """
-        This function handles a single turn for a player in the game of Hanabi.
-
-        It first prompts the player to choose an action. If there are info tokens left, he can choose to either give a hint or play a card.
-        If there aren't any info tokens left, he can only play a card.
-
-        If the player chooses to give a hint, the function calls the give_hint function and returns a tuple with the string "give hint" and the message from give_hint.
-
-        If the player chooses to play a card, he is prompted to enter the index of the card he wants to play. The function then sends a message to the server to play the card and receives a response. 
-        It prints the response and returns a tuple with the string "play card" and the response message.
-
-        Parameters:
-        playerId (str): The ID of the player.
-        socket (socket): The socket object for communication with the server.
-
-        Returns:
-        tuple: A tuple containing a string that represents the action taken ("give hint" or "play card") and the message received from the server or from the give_hint function.
-        """
-        print("Which action do you want to do?\n")
-        tokens = m.get_tokens().copy()
-        info_tk = tokens["info_tk"]
-=======
->>>>>>> cb00d88011e76911688576bb1bab8bde96efcd45
 def turn(playerId):
     """
     This function handles a single turn for a player in the game of Hanabi.
