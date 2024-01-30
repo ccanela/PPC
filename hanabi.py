@@ -26,10 +26,6 @@ class HanabiGame:
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'purple'][:num_players]
         self.discard = []
-        self.deck_mutex = th.Lock() 
-        self.suites_mutex = th.Lock()
-        self.playersCards_mutex = th.Lock()
-        self.tokens_mutex = th.Lock()
         self.players_info = players_info
         self.send("start")                      
         self.init_deck(num_players)
