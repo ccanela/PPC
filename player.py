@@ -3,8 +3,6 @@ import socket
 import os 
 import signal 
 import sys
-import atexit
-import multiprocessing as mp
 from multiprocessing.managers import BaseManager
 from print_color import print as printc
 
@@ -24,8 +22,8 @@ def player_process(playerId):
     global mq
     global socket_client
      
-    signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
-    signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
+    signal.signal(signal.SIGUSR1, end_game)  #signal for victory
+    signal.signal(signal.SIGUSR2, end_game)  #signal for game over
    
     data = receive(socket_client)      
     while data != "initCards":
@@ -66,7 +64,6 @@ def player_process(playerId):
             print(f"End of the turn of {current_player}.")
             
         gameContinue = receive(socket_client)
-        print(gameContinue)
         while 'game' not in gameContinue:            
             gameContinue = receive(socket_client) 
         send(socket_client, "ok")    
@@ -102,7 +99,6 @@ def turn(playerId):
                 print("Invalid card index. Please try again.")
         send(socket_client, f"play card {str(i_card -1)}")
         message = receive(socket_client)
-        print(message)
         return("play card", message)
 
 def give_hint(player):
@@ -248,10 +244,9 @@ def receive(socket_connexion, buffer_size=1024):
         return None       
     
 def user():
-    answer = 3
-    while answer != 1:
-        print("1. to join the game")
-        answer = int(input())
+    answer = 0
+    while answer != "1":
+        answer = input("1. to join the game\n")
     return 
 
 if __name__ == "__main__" :
@@ -270,7 +265,6 @@ if __name__ == "__main__" :
         print(f"You are the {playerId}")
     
         data = receive(socket_client)
-        # print(data)
         while data != "start":
             data = receive(socket_client)
             

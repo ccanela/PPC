@@ -1,10 +1,8 @@
 import sys 
 import random
 import socket
-import os 
-import time
+import os
 import signal
-import threading as th
 from multiprocessing.managers import BaseManager
 # from affichage import *
 
