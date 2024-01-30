@@ -161,7 +161,7 @@ class HanabiGame:
                     print(f"Error: No permission to send a signal to the process {pid}")
             
             self.send("end of the game")            
-            os._exit(0)          
+            sys.exit(0)          
 
  
 if __name__ == "__main__":
@@ -186,31 +186,9 @@ if __name__ == "__main__":
             playerId = f"player{players_connected}" 
             conn.sendall(playerId.encode())      
             players_info[playerId] = {"socket": (conn, addr), "pid": int(pid)}
-            # print(players_info)
             
         print("Starting game")       
         
         
         HanabiGame(num_players, players_info) 
  
- 
-""" 
-def discard_card(self, player):
-    # Avant de faire l'appel on doit regarder que note_tk_used > 0 sinon on peut pas "discard_card"
-    self.note_tk_used -= 1
-    self.note_tk += 1
-
-    #card_to_discard = le jouer choisira a travers l'interface graphique 
-
-    # Remove the chosen card from the player's hand
-    self.players_cards[player].remove(card_to_discard)
-
-    # Add the discarded card to the discard pile
-    self.discarded_cards.append(card_to_discard)
-
-    # Draw another card into the player's hand
-    if len(self.deck) > 0:
-        new_card = self.deck.pop()
-        self.players_cards[player].append(new_card)
-
-"""

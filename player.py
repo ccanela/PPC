@@ -20,8 +20,8 @@ m.connect()
 
 def player_process(playerId, socket_client, mq):
         
-    signal.signal(signal.SIGUSR1, end_game)  #signal pour victoire
-    signal.signal(signal.SIGUSR2, end_game)  #signal pour game over
+    signal.signal(signal.SIGUSR1, end_game)  #signal for vicotry
+    signal.signal(signal.SIGUSR2, end_game)  #signal for loss
    
     data = receive(socket_client)      
     while data != "initCards":
@@ -180,14 +180,14 @@ def gameRules():
     printc('\n\nHanabi Game', format='bold', color='cyan')
     printc("\n\nRules : \n", format='bold')  
     print("This is a cooperative game where you can only see the cards of other players.\n"+
-          "The board is composed by as many suites as the number of players. The suites are in ascending order.\n"
-          "When your turn come, you can play one of your cards or give a hint to an other player\n"+
-          "To play a card, the suites of the color card corresponding needs to contain the first number\nbefore the number of the card you want to play."+
-          "If the card you want to play is not suitable, you lose one Fuse Token.\nIf you achieve one complete suite (from 1 to 5), you regain one Info Token."+
+          "The board is composed by as many suites as number of players. The suites are in ascending order.\n"
+          "When your turn comes, you can either play one of your cards or give a hint to an other player\n"+
+          "To play a card, the suit of the same color on the board must contain the previous number of the card you want to play.\n"+
+          "If the card you want to play is not valid, you lose one Fuse Token.\nIf you achieve one complete suite (from 1 to 5), you regain one Info Token."+
           "To give a hint to an other player, you need to have at least\none Info Token (you lose it while you are giving the hint).\n"+
-          "When a color hint is given about a card, the player is advertised for all the cards of this color.\n"+
+          "When a color hint is given about a card, the player is advertised for all the cards of this color. Same for the number hint.\n"+
           "All the players can see when a hint is given. The card is followed by 'n'\nif this is a number hint or/and by 'c' if this is a color hint."+
-          "When you lose all your Fuse Tokens, you lose the Hanabi Game.\nBut if you achieve to complete all the suites, you win !!\n\n"          
+          "When you lose all your Fuse Tokens, you lose the Hanabi Game.\nBut if you manage to complete all the suites before that happens, you win !!\n\n"          
           )  
 
 def print_board(playerId):
