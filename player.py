@@ -19,7 +19,23 @@ m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
 m.connect()
 
 def player_process(playerId, socket_client, mq):
-        
+    """
+    This function handles the process for a single player in hanabi game.
+
+    It sets up signal handlers for game end conditions, receives initial data from the server, 
+    and enters a main game loop where it handles turns for the player. 
+
+    During a player's turn, it sends actions and messages to other players via a message queue, 
+    and receives and processes actions from other players when it's not the player's turn.
+
+    Parameters:
+    playerId (str): The ID of the player.
+    socket_client (socket): The socket object for communication with the server.
+    mq (SysVMessageQueue): The message queue for communication with other players.
+
+    Returns:
+    None
+    """   
     signal.signal(signal.SIGUSR1, end_game)  #signal for vicotry
     signal.signal(signal.SIGUSR2, end_game)  #signal for loss
    
@@ -68,6 +84,24 @@ def player_process(playerId, socket_client, mq):
     
         
 def turn(playerId, socket):
+        """
+        This function handles a single turn for a player in the game of Hanabi.
+
+        It first prompts the player to choose an action. If there are info tokens left, he can choose to either give a hint or play a card.
+        If there aren't any info tokens left, he can only play a card.
+
+        If the player chooses to give a hint, the function calls the give_hint function and returns a tuple with the string "give hint" and the message from give_hint.
+
+        If the player chooses to play a card, he is prompted to enter the index of the card he wants to play. The function then sends a message to the server to play the card and receives a response. 
+        It prints the response and returns a tuple with the string "play card" and the response message.
+
+        Parameters:
+        playerId (str): The ID of the player.
+        socket (socket): The socket object for communication with the server.
+
+        Returns:
+        tuple: A tuple containing a string that represents the action taken ("give hint" or "play card") and the message received from the server or from the give_hint function.
+        """
         print("Which action do you want to do?\n")
         tokens = m.get_tokens().copy()
         info_tk = tokens["info_tk"]
@@ -100,6 +134,26 @@ def turn(playerId, socket):
             return("play card", message)
 
 def give_hint(player):
+    """
+    This function handles the process of giving a hint in the game of Hanabi.
+
+    It first checks the number of info tokens available and updates it. 
+    Then it prompts the player to choose a teammate to give a hint to.
+
+    The player is then shown the teammate's cards and asked to choose a hint type (number or color)
+    and the index of the card they want to give a hint about.
+
+    Depending on the hint type chosen, the function updates the hint_color or hint_number 
+    attribute of the cards in the teammate's hand that match the chosen card's color or number.
+
+    Finally, it constructs a message about the hint given and returns it.
+
+    Parameters:
+    playerId (str): The ID of the player giving the hint.
+
+    Returns:
+    str: A message about the hint given.
+    """
     info_tk = m.get_tokens()._getvalue()["info_tk"]
     print(f"{info_tk-1} info tokens left")
     m.set_tokens("info_tk", info_tk-1)
@@ -163,20 +217,42 @@ def give_hint(player):
     return message
    
 def end_game(signum, frame):
-    print("2")
+    """
+    This function handles the end of the game.
+
+    It is designed to be used as a signal handler for SIGUSR1 and SIGUSR2 signals. 
+    SIGUSR1 indicates a victory, while SIGUSR2 indicates a loss. 
+
+    When a signal is received, the function prints a message indicating the signal number and the game status, 
+    and then it terminates the process.
+
+    Parameters:
+    signum (int): The signal number. Expected to be either signal.SIGUSR1 or signal.SIGUSR2.
+    frame (frame or None): The current stack frame. Not used in this function.
+
+    Returns:
+    None
+    """
     if signum == signal.SIGUSR1:
         print(f"Signal received: {signum}. Game status: Victory!!!")
-        #timer ou affichage
     if signum == signal.SIGUSR2:
         print(f"Signal received: {signum}. Game status:  Loss")
-        #affichage ou timer 
-    #vider toutes les ressources avant de faire "exit"
-    #mq.close()
-    #socket_client.close()
-    #normalement sys.exit(0) s'occupe de vider toutes les ressources 
     sys.exit(0)
     
 def gameRules():
+    """
+    This function prints the rules of the game Hanabi.
+
+    The rules are printed in a formatted and colored way for better readability. 
+    The rules cover the game's objective, the gameplay mechanics, the conditions for winning and losing, 
+    and the actions that players can take during their turn.
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
     printc('\n\nHanabi Game', format='bold', color='cyan')
     printc("\n\nRules : \n", format='bold')  
     print("This is a cooperative game where you can only see the cards of other players.\n"+
@@ -191,6 +267,25 @@ def gameRules():
           )  
 
 def print_board(playerId):
+    """
+    This function prints the current state of the game board in the game of Hanabi.
+
+    It retrieves the current state of the suites, players cards, and tokens from the game model. 
+    It then prints the number of fuse and info tokens, the current state of the suites, and the cards in each player's hand.
+
+    For the playerId's (the one using that terminal) cards, it prints the number and color of the card if both color and number hints have been given, 
+    a dash and the color if only a color hint has been given, the number if only a number hint has been given, 
+    and a dash if no hints have been given.
+
+    For other players' cards, it prints the number and color of the card, followed by a 'c' if a color hint has been given 
+    and a 'n' if a number hint has been given.
+
+    Parameters:
+    playerId (str): The ID of the player whose perspective the board should be printed from.
+
+    Returns:
+    None
+    """
     suites = m.get_suites().copy()
     players_cards = m.get_players_cards().copy()
     tokens = m.get_tokens().copy()
@@ -231,6 +326,19 @@ def print_board(playerId):
                 print(end="  ")     
     
 def send(socket_connexion, data):
+    """
+    This function sends data over a socket connection.
+
+    It first encodes the data into bytes, then sends it over the socket connection using the sendall method, 
+    which ensures that all the data is sent. If an error occurs during this process, it catches the exception and prints an error message.
+
+    Parameters:
+    socket_connexion (socket): The socket object for the connection.
+    data (str): The data to be sent.
+
+    Returns:
+    None
+    """
     try:
         data_encoded = data.encode()      
         socket_connexion.sendall(data_encoded)   
@@ -239,6 +347,22 @@ def send(socket_connexion, data):
    
         
 def receive(socket_connexion, buffer_size=1024):
+    """
+    This function receives data over a socket connection.
+
+    It tries to receive data from the socket connection using the recv method, which blocks until data is available. 
+    The amount of data to be received at a time is specified by the buffer_size parameter. 
+    The received data is then decoded from bytes to a string.
+
+    If an error occurs during this process, it catches the exception, prints an error message, and returns None.
+
+    Parameters:
+    socket_connexion (socket): The socket object for the connection.
+    buffer_size (int, optional): The maximum amount of data to be received at once. Defaults to 1024.
+
+    Returns:
+    str: The received data as a string, or None if an error occurred.
+    """
     try:
         data_received = socket_connexion.recv(buffer_size)        
         data_decoded = data_received.decode() 
@@ -248,12 +372,40 @@ def receive(socket_connexion, buffer_size=1024):
         return None       
     
 def user():
+    """
+    This function handles the user's decision to join the game.
+
+    It prompts the user with an option to join the game. The user is repeatedly asked until they choose the option to join the game by entering '1'.
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
     answer = 3
     while answer != 1:
         print("1. to join the game")
         answer = int(input())
     return  
 
+
+"""
+This script is the main entry point for a player in the game of Hanabi.
+
+When run, it does the following:
+
+1. Creates a unique key for a message queue and creates the queue.
+2. Gets the process ID of the current process.
+3. Displays the game rules.
+4. Handles the user's decision to join the game.
+5. Creates a new socket object and establishes a connection to the server.
+6. Sends the process ID to the server and receives the player ID from the server.
+7. Waits for the server to send the "start" message.
+8. Starts the player process, which handles the game logic for the player.
+
+The player process is run in a separate function, player_process, which takes the player ID, the socket object, and the message queue as parameters.
+"""
 if __name__ == "__main__" :
     key = 100
     mq = ipc.MessageQueue(key, ipc.IPC_CREAT)

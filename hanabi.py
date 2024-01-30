@@ -5,10 +5,10 @@ import os
 import signal
 import threading as th
 from multiprocessing.managers import BaseManager
-# from affichage import *
 
 class RemoteManager(BaseManager): pass
 
+# Register methods that can be called on the server
 RemoteManager.register('get_suites')
 RemoteManager.register('get_players_cards')
 RemoteManager.register('get_tokens')
@@ -16,7 +16,9 @@ RemoteManager.register('set_players_cards')
 RemoteManager.register('set_tokens')
 RemoteManager.register('set_suites')
 
+# Create an instance of RemoteManager
 m = RemoteManager(address=('localhost', 50000), authkey=b'abracadabra')
+# Connect to the server
 m.connect()
 
 
@@ -25,10 +27,6 @@ class HanabiGame:
         self.num_players = num_players
         self.colors = ['red', 'blue', 'green', 'yellow', 'purple'][:num_players]
         self.discard = []
-        self.deck_mutex = th.Lock() 
-        self.suites_mutex = th.Lock()
-        self.playersCards_mutex = th.Lock()
-        self.tokens_mutex = th.Lock()
         self.players_info = players_info
         self.send("start")                      
         self.init_deck(num_players)
